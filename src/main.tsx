@@ -21,6 +21,7 @@ import ViewAttendancePage from "./pages/ViewAttendancePage.tsx";
 import { AttendanceLoader } from "./loaders/AttendanceLoader.ts";
 import UserProfiles from "./pages/UserProfiles.tsx";
 import NotFound from "./pages/OtherPage/NotFound.tsx";
+import ChatPage from "./pages/ChatPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: '*',
         element: <NotFound />
+      },
+      {
+        path: '/chat',
+        element: <ChatPage />
       }
     ]
   }

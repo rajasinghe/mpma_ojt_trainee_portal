@@ -4,7 +4,6 @@ import {z} from "zod";
 import Label from '../../components/form/Label';
 import ComponentCard from '../../components/common/ComponentCard';
 import Input from '../../components/form/input/InputField';
-import Button from '../../components/ui/button/Button';
 
 interface TraineedataFormProps {
     className?: string;
@@ -42,9 +41,10 @@ export default function TraineeDetailsForm({className,style}: TraineedataFormPro
         handleSubmit,
         setError,
         reset,
-        formState: {errors, isSubmitting}
+        formState: {errors, isSubmitting, isValid}
     } = useForm<FormData>({
-        resolver: zodResolver(schema)
+        resolver: zodResolver(schema),
+        mode: "onChange"
     });
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
@@ -256,19 +256,20 @@ export default function TraineeDetailsForm({className,style}: TraineedataFormPro
                 </div>
 
                 <div className="flex items-center justify-start gap-3">
-                    <Button
-                        disabled={isSubmitting}
-                        onClick={handleSubmit(onSubmit)}
-                        variant="primary"
-                    >
-                        {isSubmitting ? "Loading..." : "Submit"}
-                    </Button>
-                    <Button
-                        onClick={() => reset()}
-                        variant="outline"
-                    >
-                        Reset
-                    </Button>
+                <button
+                    type="submit"
+                    disabled={isSubmitting || !isValid}
+                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-brand-300"
+                >
+                    {isSubmitting ? "Submitting..." : "Submit"}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => reset()}
+                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+                >
+                    Reset
+                </button>
                 </div>
                 </div>
             </form>

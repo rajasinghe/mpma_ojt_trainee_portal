@@ -14,6 +14,7 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
+  ChatIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -53,7 +54,11 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
-
+  {
+    icon: <ChatIcon />,
+    name: "Chat",
+    path: "/chat",
+  },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
@@ -275,30 +280,29 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
+        <Link to="/" className="flex items-center gap-2">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
+                className="w-10 h-auto dark:hidden"
+                src="/images/logo/SLPA_Logo-Cu9TOj32.png"
                 alt="Logo"
-                width={150}
-                height={40}
               />
               <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                className="hidden w-10 h-auto dark:block"
+                src="/images/logo/SLPA_Logo-Cu9TOj32.png"
                 alt="Logo"
-                width={150}
-                height={40}
               />
+              <div>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">MPMA</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400"> OJT Portal</span>
+              </div>
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              className="w-10 h-auto"
+              src="/images/logo/SLPA_Logo-Cu9TOj32.png"
               alt="Logo"
-              width={32}
-              height={32}
             />
           )}
         </Link>
