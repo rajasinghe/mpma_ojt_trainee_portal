@@ -1,76 +1,210 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import "./index.css";
-import "swiper/swiper-bundle.css";
-import "simplebar-react/dist/simplebar.min.css";
-import { AppWrapper } from "./components/common/PageMeta.tsx";
-import { ThemeProvider } from "./context/ThemeContext.tsx";
-import TraineedataPage from './pages/TraineedataPage';
-import { TraineedataLoader } from './loaders/TraineedataLoader';
-import { ScrollToTop } from "./components/common/ScrollToTop.tsx";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
 
-import Calendar from "./pages/Calendar";
-import Blank from "./pages/Blank";
-import Home from "./pages/Dashboard/Home";
-import AppLayout from "./layout/AppLayout.tsx";
-import ViewAttendancePage from "./pages/ViewAttendancePage.tsx";
-import { AttendanceLoader } from "./loaders/AttendanceLoader.ts";
-import UserProfiles from "./pages/UserProfiles.tsx";
-import NotFound from "./pages/OtherPage/NotFound.tsx";
-import ChatPage from "./pages/ChatPage.tsx";
+import { RouterProvider } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { ToastProvider } from './contexts/ToastContext';
+import ToastContainer from './components/ui/ToastContainer';
 
-const router = createBrowserRouter([
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Loaders
+import { adminDashboardLoader, superAdminDashboardLoader } from './loaders/dashboardLoaders';
+import { traineePaymentsLoader, traineeAttendanceLoader } from './loaders/traineeLoaders';
+import { adminsLoader, traineesLoader } from './loaders/adminLoaders';
+
+// Auth Pages
+import Login from './pages/Login';
+import Onboarding from './pages/trainee/Onboarding';
+
+// Layouts
+import TraineeLayout from './layouts/TraineeLayout';
+import AdminLayout from './layouts/AdminLayout';
+import SuperAdminLayout from './layouts/SuperAdminLayout';
+
+// Trainee Pages
+import TraineeDetails from './pages/trainee/TraineeDetails';
+import TraineeAttendance from './pages/trainee/TraineeAttendance';
+import TraineePayments from './pages/trainee/TraineePayments';
+import TraineeCalendar from './pages/trainee/TraineeCalendar';
+import TraineeNotifications from './pages/trainee/TraineeNotifications';
+import TraineeChat from './pages/trainee/TraineeChat';
+import TraineeProfile from './pages/trainee/TraineeProfile';
+
+// Admin Pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminTrainees from './pages/admin/AdminTrainees';
+import AdminAttendance from './pages/admin/AdminAttendance';
+import AdminPayments from './pages/admin/AdminPayments';
+import AdminCalendar from './pages/admin/AdminCalendar';
+import AdminMessages from './pages/admin/AdminMessages';
+import AdminReports from './pages/admin/AdminReports';
+import AdminSettings from './pages/admin/AdminSettings';
+
+// SuperAdmin Pages
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
+import SuperAdminAdmins from './pages/superadmin/SuperAdminAdmins';
+import SuperAdminTrainees from './pages/superadmin/SuperAdminTrainees';
+import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
+
+export const router = createBrowserRouter([
   {
-    element: <AppLayout />,
+    path: "/",
+    element: <Navigate to="/login" replace />
+  },
+  {
+    path: "/login",
+    element: <Login />
+  },
+  {
+    path: "/onboarding",
+    element: (
+      <ProtectedRoute role="trainee" requiresOnboarding={false}>
+        <Onboarding />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/superadmin",
+    element: (
+      <ProtectedRoute role="superadmin">
+        <SuperAdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
-        path: '/traineedata',
-        element: <TraineedataPage />,
-        loader: TraineedataLoader
+        index: true,
+        element: <Navigate to="/superadmin/dashboard" replace />
       },
       {
-        path: '/attendance',
-        element: <ViewAttendancePage />,
-        loader: AttendanceLoader
+        path: "dashboard",
+        element: <SuperAdminDashboard />,
+        loader: superAdminDashboardLoader
       },
       {
-        path: '/calendar',
-        element: <Calendar />
+        path: "admins",
+        element: <SuperAdminAdmins />,
+        loader: adminsLoader
       },
       {
-        path: '/blank',
-        element: <Blank />
+        path: "trainees",
+        element: <SuperAdminTrainees />,
+        loader: traineesLoader
       },
       {
-        path: '/',
-        element: <Home />
+        path: "settings",
+        element: <SuperAdminSettings />
+      }
+    ]
+  },
+  {
+    path: "/admin",
+    element: (
+      <ProtectedRoute role="admin">
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/admin/dashboard" replace />
       },
       {
-        path: '/profile',
-        element: <UserProfiles />
+        path: "dashboard",
+        element: <AdminDashboard />,
+        loader: adminDashboardLoader
       },
       {
-        path: '*',
-        element: <NotFound />
+        path: "trainees",
+        element: <AdminTrainees />,
+        loader: traineesLoader
       },
       {
-        path: '/chat',
-        element: <ChatPage />
+        path: "attendance",
+        element: <AdminAttendance />
+      },
+      {
+        path: "payments",
+        element: <AdminPayments />
+      },
+      {
+        path: "calendar",
+        element: <AdminCalendar />
+      },
+      {
+        path: "messages",
+        element: <AdminMessages />
+      },
+      {
+        path: "reports",
+        element: <AdminReports />
+      },
+      {
+        path: "settings",
+        element: <AdminSettings />
+      }
+    ]
+  },
+  {
+    path: "/trainee",
+    element: (
+      <ProtectedRoute role="trainee">
+        <TraineeLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/trainee/details" replace />
+      },
+      {
+        path: "details",
+        element: <TraineeDetails />
+      },
+      {
+        path: "attendance",
+        element: <TraineeAttendance />,
+        loader: traineeAttendanceLoader
+      },
+      {
+        path: "payments",
+        element: <TraineePayments />,
+        loader: traineePaymentsLoader
+      },
+      {
+        path: "calendar",
+        element: <TraineeCalendar />
+      },
+      {
+        path: "notifications",
+        element: <TraineeNotifications />
+      },
+      {
+        path: "chat",
+        element: <TraineeChat />
+      },
+      {
+        path: "profile",
+        element: <TraineeProfile />
       }
     ]
   }
 ]);
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <ThemeProvider>
-      <AppWrapper>
-        <RouterProvider router={router} />
-      </AppWrapper>
+      <AuthProvider>
+        <ToastProvider>
+          <div className="min-h-screen bg-gray-50 transition-colors">
+            <RouterProvider router={router} />
+            <ToastContainer />
+          </div>
+        </ToastProvider>
+      </AuthProvider>
     </ThemeProvider>
-  </React.StrictMode>
+  </StrictMode>
 );
