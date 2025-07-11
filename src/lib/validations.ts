@@ -19,7 +19,7 @@ export const personalDetailsSchema = z.object({
   address: z.string().min(10, 'Address must be at least 10 characters').max(200, 'Address must be less than 200 characters'),
   trainingInstitute: z.string().min(2, 'Training institute is required'),
   course: z.string().min(2, 'Course is required'),
-  profilePhoto: z.instanceof(File, 'Profile photo is required').optional()
+  profilePhoto: z.instanceof(File, { message: 'Profile photo is required' }).optional()
 });
 
 export const contactInfoSchema = z.object({
@@ -64,15 +64,6 @@ export const passwordChangeSchema = z.object({
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
-});
-
-// Admin validation schemas
-export const createAdminSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters'),
-  email: emailSchema,
-  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be less than 20 characters').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-  status: z.enum(['active', 'inactive']),
-  permissions: z.array(z.string()).min(1, 'At least one permission is required')
 });
 
 export const traineeCreateSchema = z.object({
@@ -131,7 +122,6 @@ export type PaymentFormData = z.infer<typeof paymentSchema>;
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
 export type BankDetailsFormData = z.infer<typeof bankDetailsSchema>;
 export type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
-export type CreateAdminFormData = z.infer<typeof createAdminSchema>;
 export type TraineeCreateFormData = z.infer<typeof traineeCreateSchema>;
 export type MessageFormData = z.infer<typeof messageSchema>;
 export type SystemSettingsFormData = z.infer<typeof systemSettingsSchema>;

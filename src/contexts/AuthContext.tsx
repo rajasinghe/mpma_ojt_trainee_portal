@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface User {
   id: string;
   username: string;
-  role: 'trainee' | 'admin' | 'superadmin';
   name: string;
   email: string;
   avatar?: string;
@@ -26,37 +25,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock users for demo
 const mockUsers: Record<string, User> = {
-  'superadmin': {
-    id: '1',
-    username: 'superadmin',
-    role: 'superadmin',
-    name: 'Super Administrator',
-    email: 'superadmin@ojtportal.com',
-    hasCompletedOnboarding: true,
-    permissions: ['all']
-  },
-  'admin1': {
-    id: '2',
-    username: 'admin1',
-    role: 'admin',
-    name: 'Admin User',
-    email: 'admin1@ojtportal.com',
-    hasCompletedOnboarding: true,
-    permissions: ['manage_trainees', 'view_reports', 'manage_attendance']
-  },
-  'admin2': {
-    id: '3',
-    username: 'admin2',
-    role: 'admin',
-    name: 'Admin Manager',
-    email: 'admin2@ojtportal.com',
-    hasCompletedOnboarding: true,
-    permissions: ['manage_trainees', 'manage_payments']
-  },
   'trainee1': {
     id: '4',
     username: 'trainee1',
-    role: 'trainee',
     name: 'John Doe',
     email: 'john@example.com',
     hasCompletedOnboarding: false,
@@ -67,7 +38,6 @@ const mockUsers: Record<string, User> = {
   'trainee2': {
     id: '5',
     username: 'trainee2',
-    role: 'trainee',
     name: 'Jane Smith',
     email: 'jane@example.com',
     hasCompletedOnboarding: true,
@@ -78,7 +48,6 @@ const mockUsers: Record<string, User> = {
   'trainee3': {
     id: '6',
     username: 'trainee3',
-    role: 'trainee',
     name: 'Mike Johnson',
     email: 'mike@example.com',
     hasCompletedOnboarding: true,

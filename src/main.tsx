@@ -12,9 +12,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Loaders
-import { adminDashboardLoader, superAdminDashboardLoader } from './loaders/dashboardLoaders';
 import { traineePaymentsLoader, traineeAttendanceLoader } from './loaders/traineeLoaders';
-import { adminsLoader, traineesLoader } from './loaders/adminLoaders';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -22,8 +20,6 @@ import Onboarding from './pages/trainee/Onboarding';
 
 // Layouts
 import TraineeLayout from './layouts/TraineeLayout';
-import AdminLayout from './layouts/AdminLayout';
-import SuperAdminLayout from './layouts/SuperAdminLayout';
 
 // Trainee Pages
 import TraineeDetails from './pages/trainee/TraineeDetails';
@@ -33,22 +29,6 @@ import TraineeCalendar from './pages/trainee/TraineeCalendar';
 import TraineeNotifications from './pages/trainee/TraineeNotifications';
 import TraineeChat from './pages/trainee/TraineeChat';
 import TraineeProfile from './pages/trainee/TraineeProfile';
-
-// Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminTrainees from './pages/admin/AdminTrainees';
-import AdminAttendance from './pages/admin/AdminAttendance';
-import AdminPayments from './pages/admin/AdminPayments';
-import AdminCalendar from './pages/admin/AdminCalendar';
-import AdminMessages from './pages/admin/AdminMessages';
-import AdminReports from './pages/admin/AdminReports';
-import AdminSettings from './pages/admin/AdminSettings';
-
-// SuperAdmin Pages
-import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
-import SuperAdminAdmins from './pages/superadmin/SuperAdminAdmins';
-import SuperAdminTrainees from './pages/superadmin/SuperAdminTrainees';
-import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
 
 export const router = createBrowserRouter([
   {
@@ -62,96 +42,15 @@ export const router = createBrowserRouter([
   {
     path: "/onboarding",
     element: (
-      <ProtectedRoute role="trainee" requiresOnboarding={false}>
+      <ProtectedRoute requiresOnboarding={false}>
         <Onboarding />
       </ProtectedRoute>
     )
   },
   {
-    path: "/superadmin",
-    element: (
-      <ProtectedRoute role="superadmin">
-        <SuperAdminLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/superadmin/dashboard" replace />
-      },
-      {
-        path: "dashboard",
-        element: <SuperAdminDashboard />,
-        loader: superAdminDashboardLoader
-      },
-      {
-        path: "admins",
-        element: <SuperAdminAdmins />,
-        loader: adminsLoader
-      },
-      {
-        path: "trainees",
-        element: <SuperAdminTrainees />,
-        loader: traineesLoader
-      },
-      {
-        path: "settings",
-        element: <SuperAdminSettings />
-      }
-    ]
-  },
-  {
-    path: "/admin",
-    element: (
-      <ProtectedRoute role="admin">
-        <AdminLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/admin/dashboard" replace />
-      },
-      {
-        path: "dashboard",
-        element: <AdminDashboard />,
-        loader: adminDashboardLoader
-      },
-      {
-        path: "trainees",
-        element: <AdminTrainees />,
-        loader: traineesLoader
-      },
-      {
-        path: "attendance",
-        element: <AdminAttendance />
-      },
-      {
-        path: "payments",
-        element: <AdminPayments />
-      },
-      {
-        path: "calendar",
-        element: <AdminCalendar />
-      },
-      {
-        path: "messages",
-        element: <AdminMessages />
-      },
-      {
-        path: "reports",
-        element: <AdminReports />
-      },
-      {
-        path: "settings",
-        element: <AdminSettings />
-      }
-    ]
-  },
-  {
     path: "/trainee",
     element: (
-      <ProtectedRoute role="trainee">
+      <ProtectedRoute>
         <TraineeLayout />
       </ProtectedRoute>
     ),

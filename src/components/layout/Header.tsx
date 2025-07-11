@@ -1,10 +1,8 @@
-import React from 'react';
-import { Bell, Search, Menu, Crown, Shield, User } from 'lucide-react';
+import { Bell, Search, User } from 'lucide-react';
 
 interface HeaderProps {
   user: {
     name?: string;
-    role: 'trainee' | 'admin' | 'superadmin';
   } | null;
   pageTitle: string;
   onToggleSidebar: () => void;
@@ -23,49 +21,6 @@ export default function Header({
   searchQuery = '',
   onSearchChange 
 }: HeaderProps) {
-  const getRoleIcon = () => {
-    switch (user?.role) {
-      case 'superadmin':
-        return <Crown className="h-4 w-4 text-white" />;
-      case 'admin':
-        return <Shield className="h-4 w-4 text-white" />;
-      default:
-        return <User className="h-4 w-4 text-white" />;
-    }
-  };
-
-  const getRoleColor = () => {
-    switch (user?.role) {
-      case 'superadmin':
-        return 'bg-purple-600';
-      case 'admin':
-        return 'bg-green-600';
-      default:
-        return 'bg-blue-600';
-    }
-  };
-
-  const getRoleTitle = () => {
-    switch (user?.role) {
-      case 'superadmin':
-        return 'Super Administrator';
-      case 'admin':
-        return 'Administrator';
-      default:
-        return 'Trainee';
-    }
-  };
-
-  const getFocusRingColor = () => {
-    switch (user?.role) {
-      case 'superadmin':
-        return 'focus:ring-purple-500';
-      case 'admin':
-        return 'focus:ring-green-500';
-      default:
-        return 'focus:ring-blue-500';
-    }
-  };
 
   return (
     <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow-lg border-b border-gray-200">
@@ -99,7 +54,7 @@ export default function Header({
                   <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  className={`block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:border-transparent text-sm transition-all duration-200 ${getFocusRingColor()}`}
+                  className={`block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:border-transparent text-sm transition-all duration-200 focus:ring-blue-500`}
                   placeholder="Search..."
                   type="search"
                   value={searchQuery}
@@ -112,7 +67,7 @@ export default function Header({
         
         <div className="ml-4 flex items-center md:ml-6 space-x-4">
           {/* Notification Bell */}
-          <button className={`relative p-2 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 hover:bg-gray-100 ${getFocusRingColor()}`}>
+          <button className={`relative p-2 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 hover:bg-gray-100 focus:ring-blue-500`}>
             <Bell className="h-6 w-6" />
             <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
           </button>
@@ -121,13 +76,13 @@ export default function Header({
           <div className="relative">
             <div className="flex items-center space-x-3 bg-gray-50 rounded-lg px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer">
               <div className="flex-shrink-0">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center shadow-md ${getRoleColor()}`}>
-                  {getRoleIcon()}
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center shadow-md bg-blue-600`}>
+                  {<User className="h-4 w-4 text-white" />}
                 </div>
               </div>
               <div className="hidden md:block">
                 <div className="text-sm font-medium text-gray-700">{user?.name}</div>
-                <div className="text-xs text-gray-500">{getRoleTitle()}</div>
+                <div className="text-xs text-gray-500">Trainee</div>
               </div>
             </div>
           </div>

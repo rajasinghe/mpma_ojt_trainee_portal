@@ -31,15 +31,11 @@ export default function Login() {
   });
 
   if (user) {
-    if (user.role === 'trainee' && !user.hasCompletedOnboarding) {
+    if (!user.hasCompletedOnboarding) {
       return <Navigate to="/onboarding" replace />;
     }
-    // Redirect based on role
-    if (user.role === 'superadmin') {
-      return <Navigate to="/superadmin" replace />;
-    } else if (user.role === 'admin') {
-      return <Navigate to="/admin" replace />;
-    } else {
+
+    if (user.hasCompletedOnboarding) {
       return <Navigate to="/trainee" replace />;
     }
   }
