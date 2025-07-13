@@ -27,7 +27,7 @@ export function FormField({ label, error, required = false, children, className 
 interface ValidatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
-  icon?: LucideIcon;
+  icon?: typeof LucideIcon;
   iconPosition?: 'left' | 'right';
 }
 
