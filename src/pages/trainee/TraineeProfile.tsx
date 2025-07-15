@@ -39,7 +39,7 @@ export default function TraineeProfile() {
   const { success, warning } = useToastHelpers();
 
   const [profileData, setProfileData] = useState<ProfileUpdateFormData>({
-    name: user?.name || "",
+    name: user?.username || "",
     email: user?.email || "",
     phone: "+94 77 123 4567",
     bio: "Software development trainee passionate about learning new technologies.",
@@ -49,7 +49,7 @@ export default function TraineeProfile() {
     accountNo: "",
     branch: "",
     branchCode: "",
-    accountHolderName: user?.name || "",
+    accountHolderName: "",
     bankName: "Bank of Ceylon (BOC)",
   });
 
@@ -77,7 +77,7 @@ export default function TraineeProfile() {
       });
 
       if (confirmed) {
-        updateUser({ name: data.name, email: data.email });
+        updateUser({ username: data.name, email: data.email });
         success("Profile updated successfully!");
       }
     },
@@ -161,7 +161,7 @@ export default function TraineeProfile() {
           <div className="relative">
             <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">
-                {user?.name?.charAt(0) || "U"}
+                {user?.username?.charAt(0) || "U"}
               </span>
             </div>
             <button className="absolute bottom-0 right-0 bg-gray-600 text-white p-1 rounded-full hover:bg-gray-700">
@@ -169,7 +169,9 @@ export default function TraineeProfile() {
             </button>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{user?.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {user?.username}
+            </h1>
             <p className="text-gray-600">Trainee</p>
             <p className="text-sm text-gray-500">
               Member since {new Date().getFullYear()}

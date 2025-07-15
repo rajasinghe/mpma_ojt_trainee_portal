@@ -1,43 +1,47 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
 
-import { RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { ToastProvider } from './contexts/ToastContext';
-import ToastContainer from './components/ui/ToastContainer';
+import { RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import ToastContainer from "./components/ui/ToastContainer";
 
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Loaders
-import { traineePaymentsLoader, traineeAttendanceLoader } from './loaders/traineeLoaders';
+import {
+  traineePaymentsLoader,
+  traineeAttendanceLoader,
+  traineeCalendarLoader,
+} from "./loaders/traineeLoaders";
 
 // Auth Pages
-import Login from './pages/Login';
-import Onboarding from './pages/trainee/Onboarding';
+import Login from "./pages/Login";
+import Onboarding from "./pages/trainee/Onboarding";
 
 // Layouts
-import TraineeLayout from './layouts/TraineeLayout';
+import TraineeLayout from "./layouts/TraineeLayout";
 
 // Trainee Pages
-import TraineeDetails from './pages/trainee/TraineeDetails';
-import TraineeAttendance from './pages/trainee/TraineeAttendance';
-import TraineePayments from './pages/trainee/TraineePayments';
-import TraineeCalendar from './pages/trainee/TraineeCalendar';
-import TraineeNotifications from './pages/trainee/TraineeNotifications';
-import TraineeChat from './pages/trainee/TraineeChat';
-import TraineeProfile from './pages/trainee/TraineeProfile';
+import TraineeDetails from "./pages/trainee/TraineeDetails";
+import TraineeAttendance from "./pages/trainee/TraineeAttendance";
+import TraineePayments from "./pages/trainee/TraineePayments";
+import TraineeCalendar from "./pages/trainee/TraineeCalendar";
+import TraineeNotifications from "./pages/trainee/TraineeNotifications";
+import TraineeChat from "./pages/trainee/TraineeChat";
+import TraineeProfile from "./pages/trainee/TraineeProfile";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/login" replace />
+    element: <Navigate to="/login" replace />,
   },
   {
     path: "/login",
-    element: <Login />
+    element: <Login />,
   },
   {
     path: "/onboarding",
@@ -45,7 +49,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute requiresOnboarding={false}>
         <Onboarding />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: "/trainee",
@@ -57,43 +61,44 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/trainee/details" replace />
+        element: <Navigate to="/trainee/details" replace />,
       },
       {
         path: "details",
-        element: <TraineeDetails />
+        element: <TraineeDetails />,
       },
       {
         path: "attendance",
         element: <TraineeAttendance />,
-        loader: traineeAttendanceLoader
+        loader: traineeAttendanceLoader,
       },
       {
         path: "payments",
         element: <TraineePayments />,
-        loader: traineePaymentsLoader
+        loader: traineePaymentsLoader,
       },
       {
         path: "calendar",
-        element: <TraineeCalendar />
+        element: <TraineeCalendar />,
+        loader: traineeCalendarLoader,
       },
       {
         path: "notifications",
-        element: <TraineeNotifications />
+        element: <TraineeNotifications />,
       },
       {
         path: "chat",
-        element: <TraineeChat />
+        element: <TraineeChat />,
       },
       {
         path: "profile",
-        element: <TraineeProfile />
-      }
-    ]
-  }
+        element: <TraineeProfile />,
+      },
+    ],
+  },
 ]);
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <AuthProvider>

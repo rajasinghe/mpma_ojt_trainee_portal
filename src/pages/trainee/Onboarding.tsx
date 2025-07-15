@@ -259,9 +259,9 @@ export default function Onboarding() {
 
       console.log("Payment data submitted:", paymentData);
 
-      updateUser({ hasCompletedOnboarding: true });
+      updateUser({ status: 2 }); //set trainee status to 2 (onboarding complete) as pending trainee
       success("Payment successful! Onboarding complete.");
-      navigate("/trainee");
+      navigate("/trainee", { replace: true });
     } catch (err) {
       error("Payment failed.");
     }

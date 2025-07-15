@@ -1,60 +1,73 @@
-import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { LogIn, Eye, EyeOff, Users } from 'lucide-react';
-import { ValidatedInput } from '../components/ui/FormField';
-import { useFormValidation } from '../hooks/useFormValidation';
-import { loginSchema, type LoginFormData } from '../lib/validations';
+import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { LogIn, Eye, EyeOff, Users } from "lucide-react";
+import { ValidatedInput } from "../components/ui/FormField";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { loginSchema, type LoginFormData } from "../lib/validations";
 
 export default function Login() {
   const { user, login } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
-    username: '',
-    password: ''
+    username: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState('');
+  const [loginError, setLoginError] = useState("");
 
-  const { errors, isSubmitting, handleSubmit, getFieldError } = useFormValidation({
-    schema: loginSchema,
-    onSubmit: async (data: LoginFormData) => {
-      setLoginError('');
-      try {
-        const success = await login(data.username, data.password);
-        if (!success) {
-          setLoginError('Invalid username or password');
+  const { errors, isSubmitting, handleSubmit, getFieldError } =
+    useFormValidation({
+      schema: loginSchema,
+      onSubmit: async (data: LoginFormData) => {
+        setLoginError("");
+        try {
+          const success = await login(data.username, data.password);
+          if (!success) {
+            setLoginError("Login failed. Please check your credentials.");
+          }
+        } catch (error) {
+          if (error instanceof Error) {
+            setLoginError(error.message);
+          } else {
+            setLoginError("An unexpected error occurred");
+          }
         }
-      } catch (err) {
-        setLoginError('Login failed. Please try again.');
-      }
-    }
-  });
+      },
+    });
 
   if (user) {
-    if (!user.hasCompletedOnboarding) {
+    if (!user.status || user.status === 0) {
       return <Navigate to="/onboarding" replace />;
     }
 
-    if (user.hasCompletedOnboarding) {
+    if (user.status === 2) {
       return <Navigate to="/trainee" replace />;
     }
   }
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate form data before submitting
+    if (!formData.username || !formData.password) {
+      setLoginError("Please fill in all required fields");
+      return;
+    }
     handleSubmit(formData);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)' }}>
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{
+        background: "linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)",
+      }}
+    >
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
             <Users className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            OJT Portal
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900">OJT Portal</h2>
           <p className="mt-2 text-sm text-gray-600">
             Sign in to your training account
           </p>
@@ -67,8 +80,10 @@ export default function Login() {
               type="text"
               required
               value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              error={getFieldError('username')}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, username: e.target.value }))
+              }
+              error={getFieldError("username")}
               placeholder="Enter your username"
             />
 
@@ -78,14 +93,19 @@ export default function Login() {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
                   className={`block w-full px-4 py-3 pr-10 rounded-lg shadow-sm border transition-all duration-300 hover:border-gray-400 focus:shadow-lg focus:outline-none ${
-                    getFieldError('password')
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    getFieldError("password")
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   } bg-white text-gray-900 placeholder-gray-400`}
                   placeholder="Enter your password"
                 />
@@ -101,8 +121,10 @@ export default function Login() {
                   )}
                 </button>
               </div>
-              {getFieldError('password') && (
-                <p className="text-sm text-red-600 font-medium">{getFieldError('password')}</p>
+              {getFieldError("password") && (
+                <p className="text-sm text-red-600 font-medium">
+                  {getFieldError("password")}
+                </p>
               )}
             </div>
 

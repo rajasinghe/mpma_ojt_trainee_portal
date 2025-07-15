@@ -1,7 +1,7 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import PageLoader from './ui/PageLoader';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import PageLoader from "./ui/PageLoader";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -23,11 +23,11 @@ export default function ProtectedRoute({
   }
 
   if (requiresOnboarding) {
-    if (!user.hasCompletedOnboarding) {
+    if (!user.status || user.status === 0) {
       return <Navigate to="/onboarding" replace />;
     }
   } else {
-    if (user.hasCompletedOnboarding) {
+    if (user.status && (user.status === 1 || user.status === 2)) {
       return <Navigate to="/trainee" replace />;
     }
   }

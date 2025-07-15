@@ -1,4 +1,5 @@
-import { createLoader, simulateApiDelay } from './index';
+import api from "../api";
+import { createLoader, simulateApiDelay } from "./index";
 
 // Trainee Payment Data
 interface PaymentData {
@@ -17,9 +18,16 @@ interface AttendanceData {
   records: any[];
 }
 
+interface CalenderData {
+  id: number;
+  start_date: string;
+  end_date: string;
+  description: string;
+}
+
 const loadTraineePayments = async (): Promise<PaymentData> => {
   await simulateApiDelay(1000);
-  
+
   const payments = [
     /*
     id: 1,
@@ -82,7 +90,7 @@ const loadTraineePayments = async (): Promise<PaymentData> => {
       year: 2024,
       attendanceCount: 3,
       amount: 1500,
-      status: 1
+      status: 1,
     },
     {
       id: 15,
@@ -91,7 +99,7 @@ const loadTraineePayments = async (): Promise<PaymentData> => {
       year: 2024,
       attendanceCount: 17,
       amount: 5500,
-      status: 0
+      status: 0,
     },
     {
       id: 16,
@@ -100,16 +108,16 @@ const loadTraineePayments = async (): Promise<PaymentData> => {
       year: 2024,
       attendanceCount: 17,
       amount: 9000,
-      status: 0
+      status: 0,
     },
   ];
 
   const totalEarned = payments
-    .filter(payment => payment.status === 1)
+    .filter((payment) => payment.status === 1)
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   const pendingAmount = payments
-    .filter(payment => payment.status === 0)
+    .filter((payment) => payment.status === 0)
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   const dailyPayment = 500;
@@ -122,52 +130,52 @@ const loadTraineePayments = async (): Promise<PaymentData> => {
     totalDays,
     totalWorkingDays,
     dailyPayment,
-    payments
+    payments,
   };
 };
 
 const loadTraineeAttendance = async (): Promise<AttendanceData> => {
   await simulateApiDelay(800);
-  
+
   const records = [
     {
-      id: '1',
-      date: '2024-01-15',
-      onTime: '08:00',
-      offTime: '17:00',
+      id: "1",
+      date: "2024-01-15",
+      onTime: "08:00",
+      offTime: "17:00",
       status: 1,
     },
     {
-      id: '2',
-      date: '2024-01-16',
-      onTime: '08:15',
-      offTime: '17:00',
-      status: 0
+      id: "2",
+      date: "2024-01-16",
+      onTime: "08:15",
+      offTime: "17:00",
+      status: 0,
     },
     {
-      id: '3',
-      date: '2024-01-17',
-      onTime: '08:00',
-      offTime: '16:30',
-      status: 0
+      id: "3",
+      date: "2024-01-17",
+      onTime: "08:00",
+      offTime: "16:30",
+      status: 0,
     },
     {
-      id: '4',
-      date: '2024-01-18',
-      onTime: '',
-      offTime: '',
-      status: 0
+      id: "4",
+      date: "2024-01-18",
+      onTime: "",
+      offTime: "",
+      status: 0,
     },
     {
-      id: '5',
-      date: '2024-01-19',
-      onTime: '08:00',
-      offTime: '17:00',
-      status: 1
-    }
+      id: "5",
+      date: "2024-01-19",
+      onTime: "08:00",
+      offTime: "17:00",
+      status: 1,
+    },
   ];
 
-  const presentDays = records.filter(record => record.status === 1).length;
+  const presentDays = records.filter((record) => record.status === 1).length;
   const attendanceRate = (presentDays / records.length) * 100;
   const totalWorkingDays = records.length;
 
@@ -175,9 +183,28 @@ const loadTraineeAttendance = async (): Promise<AttendanceData> => {
     totalWorkingDays,
     presentDays,
     attendanceRate,
-    records
+    records,
   };
 };
 
+const traineeEventLoader = async (): Promise<CalenderData[]> => {
+  try {
+    const response = await api.get("api/trainee/holidays");
+
+    if (response.status === 200) {
+      return response.data;
+    }
+
+    return []; // Return empty array if no data
+  } catch (error) {
+    console.error("Error fetching calendar data:", error);
+    return []; // Return empty array on error
+  }
+};
+
+// Export the loader
+export const traineeCalendarLoader = createLoader(traineeEventLoader, 600);
+
 export const traineePaymentsLoader = createLoader(loadTraineePayments, 600);
 export const traineeAttendanceLoader = createLoader(loadTraineeAttendance, 600);
+//export const
