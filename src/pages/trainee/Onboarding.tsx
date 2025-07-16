@@ -54,7 +54,11 @@ export default function Onboarding() {
         emergencyContactTelephone: "",
       },
       documents: {
-        documents: [],
+        nicFront: null,
+        nicBack: null,
+        policeReport: null,
+        birthCertificate: null,
+        instituteLetter: null,
       },
       bankPayment: {
         paymentAmount: "",
@@ -66,10 +70,12 @@ export default function Onboarding() {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [dragActive, setDragActive] = useState(false);
   const { updateUser, logout } = useAuth();
   const navigate = useNavigate();
-  const { success, error, warning } = useToastHelpers();
+  const { success, error } = useToastHelpers();
+  const [dragActiveSection, setDragActiveSection] = useState<string | null>(
+    null
+  );
 
   const steps = [
     {
@@ -103,7 +109,11 @@ export default function Onboarding() {
   ];
 
   const profilePhoto = watch("personalDetails.profilePhoto");
-  const documents = watch("documents.documents");
+  const nicFront = watch("documents.nicFront");
+  const nicBack = watch("documents.nicBack");
+  const policeReport = watch("documents.policeReport");
+  const birthCertificate = watch("documents.birthCertificate");
+  const instituteLetter = watch("documents.instituteLetter");
   const bankReceipt = watch("bankPayment.bankReceipt");
 
   /*
@@ -111,27 +121,19 @@ export default function Onboarding() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 */
-  const handleFileUpload = (files: FileList | null) => {
-    if (files) {
-      const newFiles = Array.from(files).filter(
-        (file) =>
-          file.type === "application/pdf" || file.type.startsWith("image/")
+  const handleDocumentUpload = (file: File, documentType: string) => {
+    if (
+      file &&
+      (file.type.startsWith("image/") || file.type === "application/pdf")
+    ) {
+      setValue(`documents.${documentType}` as any, file);
+      success(
+        `${documentType
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())} uploaded successfully`
       );
-
-      if (newFiles.length !== files.length) {
-        warning(
-          "Some files were skipped. Only PDF and image files are allowed."
-        );
-      }
-
-      // Get the current documents
-      const currentDocs = getValues("documents.documents") || [];
-
-      setValue("documents.documents", [...currentDocs, ...newFiles]);
-
-      if (newFiles.length > 0) {
-        success(`${newFiles.length} file(s) uploaded successfully`);
-      }
+    } else {
+      error("Please select a valid image or PDF file");
     }
   };
 
@@ -144,14 +146,13 @@ export default function Onboarding() {
     }
   };
 
-  const removeDocument = (index: number) => {
-    const currentDocs = getValues("documents.documents") || [];
-    setValue(
-      "documents.documents",
-      currentDocs.filter((_, i) => i !== index)
+  const removeDocument = (documentType: string) => {
+    setValue(`documents.${documentType}` as any, null);
+    success(
+      `${documentType
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (str) => str.toUpperCase())} removed`
     );
-
-    success("Document removed");
   };
 
   const removePhoto = () => {
@@ -159,21 +160,27 @@ export default function Onboarding() {
     success("Profile photo removed");
   };
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, section: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    setDragActiveSection(section);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(false);
-    handleFileUpload(e.dataTransfer.files);
+    setDragActiveSection(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, documentType: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActiveSection(null);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleDocumentUpload(file, documentType);
+    }
   };
 
   const removeReceipt = () => {
@@ -218,9 +225,29 @@ export default function Onboarding() {
       } else if (currentStep === 2) {
         isValid = await trigger("contactInfo");
       } else if (currentStep === 3) {
-        isValid = await trigger("documents.documents");
-        if (!isValid && documents.length < 3) {
-          error("Please upload at least 3 documents");
+        isValid = await trigger("documents");
+        const docs = getValues("documents");
+        const requiredDocs = [
+          "nicFront",
+          "nicBack",
+          "policeReport",
+          "birthCertificate",
+          "instituteLetter",
+        ];
+        const missingDocs = requiredDocs.filter(
+          (doc) => !docs[doc as keyof typeof docs]
+        );
+
+        if (missingDocs.length > 0) {
+          error(
+            `Please upload all required documents: ${missingDocs
+              .map((doc) =>
+                doc
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/^./, (str) => str.toUpperCase())
+              )
+              .join(", ")}`
+          );
           return;
         }
         if (isValid) {
@@ -252,7 +279,7 @@ export default function Onboarding() {
       const traineeData = {
         personalDetails: data.personalDetails,
         contactInfo: data.contactInfo,
-        documents: data.documents.documents,
+        documents: data.documents,
       };
 
       // Simulate payment processing
@@ -404,7 +431,7 @@ export default function Onboarding() {
                             <img
                               src={URL.createObjectURL(profilePhoto)}
                               alt="Profile"
-                              className="w-24 h-24 rounded-full object-cover border-4 border-blue-500"
+                              className="w-24 h-24 rounded-lg object-cover border-4 border-blue-500"
                             />
                             <button
                               onClick={removePhoto}
@@ -416,7 +443,7 @@ export default function Onboarding() {
                           </div>
                         ) : (
                           <label className="cursor-pointer">
-                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors">
+                            <div className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors">
                               <Camera className="h-8 w-8 text-gray-400" />
                             </div>
                             <input
@@ -643,85 +670,449 @@ export default function Onboarding() {
                       Required Documents:
                     </h4>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• NIC Scan (Front and Back)</li>
+                      <li>• NIC Scan Front and Back</li>
                       <li>• Police Report</li>
                       <li>• Birth Certificate</li>
+                      <li>• Institute Letter</li>
                     </ul>
                   </div>
 
-                  {/* Document Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Upload Documents *
-                    </label>
-                    <div
-                      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                        dragActive
-                          ? "border-blue-400 bg-blue-50"
-                          : "border-gray-300"
-                      }`}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                    >
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="mt-4">
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <span className="text-blue-600 hover:text-blue-500 font-medium">
-                            Click to upload
-                          </span>
-                          <span className="text-gray-600">
-                            {" "}
-                            or drag and drop
-                          </span>
-                        </label>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                          multiple
-                          accept=".pdf,.png,.jpg,.jpeg"
-                          onChange={(e) => handleFileUpload(e.target.files)}
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        PDF, PNG, JPG up to 10MB each
-                      </p>
-                    </div>
-
-                    {documents.length > 0 && (
-                      <div className="mt-4 space-y-3">
-                        <h4 className="text-sm font-medium text-gray-900">
-                          Uploaded Documents ({documents.length})
-                        </h4>
-                        {documents.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                          >
+                  {/* Individual Document Uploads */}
+                  <div className="space-y-6">
+                    {/* NIC Front */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        NIC Scan Front *
+                      </label>
+                      {nicFront instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center">
-                              <FileText className="h-5 w-5 text-gray-400 mr-3" />
+                              {nicFront.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
                               <div>
                                 <p className="text-sm font-medium text-gray-900">
-                                  {file.name}
+                                  {nicFront.name}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                                  {(nicFront.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                               </div>
                             </div>
                             <button
-                              onClick={() => removeDocument(index)}
+                              onClick={() => removeDocument("nicFront")}
+                              type="button"
                               className="text-red-600 hover:text-red-500 text-sm"
                             >
-                              Remove
+                              <X className="h-4 w-4" />
                             </button>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          {nicFront.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(nicFront)}
+                                alt="NIC Front Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) => handleDragOver(e, "nicFront")}
+                          onDragLeave={handleDragLeave}
+                          onDrop={(e) => handleDrop(e, "nicFront")}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
+                            ${
+                              dragActiveSection === "nicFront"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                        >
+                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                          <div className="mt-2">
+                            <label
+                              htmlFor="nic-front-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
+                                Click to upload NIC Front or drag and drop
+                              </span>
+                            </label>
+                            <input
+                              id="nic-front-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleDocumentUpload(
+                                  e.target.files[0],
+                                  "nicFront"
+                                )
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* NIC Back */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        NIC Scan Back *
+                      </label>
+                      {nicBack instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              {nicBack.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {nicBack.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(nicBack.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeDocument("nicBack")}
+                              type="button"
+                              className="text-red-600 hover:text-red-500 text-sm"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                          {nicBack.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(nicBack)}
+                                alt="NIC Back Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) => handleDragOver(e, "nicBack")}
+                          onDragLeave={handleDragLeave}
+                          onDrop={(e) => handleDrop(e, "nicBack")}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
+                            ${
+                              dragActiveSection === "nicBack"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                        >
+                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                          <div className="mt-2">
+                            <label
+                              htmlFor="nic-back-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
+                                Click to upload NIC Back or drag and drop
+                              </span>
+                            </label>
+                            <input
+                              id="nic-back-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleDocumentUpload(
+                                  e.target.files[0],
+                                  "nicBack"
+                                )
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Police Report */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Police Report *
+                      </label>
+                      {policeReport instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              {policeReport.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {policeReport.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(policeReport.size / 1024 / 1024).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeDocument("policeReport")}
+                              type="button"
+                              className="text-red-600 hover:text-red-500 text-sm"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                          {policeReport.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(policeReport)}
+                                alt="Police Report Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) => handleDragOver(e, "policeReport")}
+                          onDragLeave={handleDragLeave}
+                          onDrop={(e) => handleDrop(e, "policeReport")}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
+                            ${
+                              dragActiveSection === "policeReport"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                        >
+                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                          <div className="mt-2">
+                            <label
+                              htmlFor="police-report-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
+                                Click to upload Police Report or drag and drop
+                              </span>
+                            </label>
+                            <input
+                              id="police-report-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleDocumentUpload(
+                                  e.target.files[0],
+                                  "policeReport"
+                                )
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Birth Certificate */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Birth Certificate *
+                      </label>
+                      {birthCertificate instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              {birthCertificate.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {birthCertificate.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(
+                                    birthCertificate.size /
+                                    1024 /
+                                    1024
+                                  ).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeDocument("birthCertificate")}
+                              type="button"
+                              className="text-red-600 hover:text-red-500 text-sm"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                          {birthCertificate.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(birthCertificate)}
+                                alt="Birth Certificate Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) =>
+                            handleDragOver(e, "birthCertificate")
+                          }
+                          onDragLeave={handleDragLeave}
+                          onDrop={(e) => handleDrop(e, "birthCertificate")}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
+                            ${
+                              dragActiveSection === "birthCertificate"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                        >
+                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                          <div className="mt-2">
+                            <label
+                              htmlFor="birth-certificate-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
+                                Click to upload Birth Certificate or drag and
+                                drop
+                              </span>
+                            </label>
+                            <input
+                              id="birth-certificate-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleDocumentUpload(
+                                  e.target.files[0],
+                                  "birthCertificate"
+                                )
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Institute Letter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Institute Letter *
+                      </label>
+                      {instituteLetter instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              {instituteLetter.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {instituteLetter.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(instituteLetter.size / 1024 / 1024).toFixed(
+                                    2
+                                  )}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeDocument("instituteLetter")}
+                              type="button"
+                              className="text-red-600 hover:text-red-500 text-sm"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                          {instituteLetter.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(instituteLetter)}
+                                alt="Institute Letter Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) =>
+                            handleDragOver(e, "instituteLetter")
+                          }
+                          onDragLeave={handleDragLeave}
+                          onDrop={(e) => handleDrop(e, "instituteLetter")}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
+                            ${
+                              dragActiveSection === "instituteLetter"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                        >
+                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                          <div className="mt-2">
+                            <label
+                              htmlFor="institute-letter-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
+                                Click to upload Institute Letter or drag and
+                                drop
+                              </span>
+                            </label>
+                            <input
+                              id="institute-letter-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleDocumentUpload(
+                                  e.target.files[0],
+                                  "instituteLetter"
+                                )
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

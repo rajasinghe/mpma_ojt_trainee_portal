@@ -53,19 +53,26 @@ export const contactInfoSchema = z.object({
   emergencyContactTelephone: phoneSchema,
 });
 
-export const documentsSchema = z.object({
-  documents: z
-    .array(z.instanceof(File))
-    .min(
-      3,
-      "At least 3 documents are required (NIC, Police report, Birth certificate)"
-    ),
+const documentsSchema = z.object({
+  nicFront: z.any().refine((file) => file !== null, "NIC Front is required"),
+  nicBack: z.any().refine((file) => file !== null, "NIC Back is required"),
+  policeReport: z
+    .any()
+    .refine((file) => file !== null, "Police Report is required"),
+  birthCertificate: z
+    .any()
+    .refine((file) => file !== null, "Birth Certificate is required"),
+  instituteLetter: z
+    .any()
+    .refine((file) => file !== null, "Institute Letter is required"),
 });
 
 const bankPaymentSchema = z.object({
   paymentAmount: z.string().min(1, "Payment amount is required"),
   paymentDate: z.string().min(1, "Payment date is required"),
-  bankReceipt: z.any().nullable(),
+  bankReceipt: z
+    .any()
+    .refine((file) => file !== null, "Institute Letter is required"),
 });
 
 export const paymentSchema = z.object({

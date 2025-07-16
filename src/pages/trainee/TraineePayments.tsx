@@ -67,15 +67,13 @@ export default function TraineePayments() {
             Track your daily training payments and earnings
           </p>
         </div>
-        <Button icon={Download} variant="outline">
-          Export Report
-        </Button>
+        <Button icon={Download}>Export Report</Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card hover color="green">
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center">
               <div className="p-3 icon-bg-green rounded-lg">
                 <DollarSign className="h-6 w-6 text-white" />
@@ -91,7 +89,7 @@ export default function TraineePayments() {
         </Card>
 
         <Card hover color="yellow">
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center">
               <div className="p-3 icon-bg-yellow rounded-lg">
                 <CreditCard className="h-6 w-6 text-white" />
@@ -107,7 +105,7 @@ export default function TraineePayments() {
         </Card>
 
         <Card hover color="blue">
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center">
               <div className="p-3 icon-bg-blue rounded-lg">
                 <Calendar className="h-6 w-6 text-white" />
@@ -123,7 +121,7 @@ export default function TraineePayments() {
         </Card>
 
         <Card hover color="purple">
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center">
               <div className="p-3 icon-bg-purple rounded-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
@@ -141,7 +139,7 @@ export default function TraineePayments() {
 
       {/* Payment Info Card */}
       <Card color="cyan">
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-lg">
             <h3 className="text-lg font-semibold text-cyan-900 mb-2">
               How Payments Work
@@ -171,7 +169,7 @@ export default function TraineePayments() {
 
       {/* Filters */}
       <Card color="orange">
-        <CardContent className="p-6">
+        <CardContent className="pr-10 pl-10">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold text-orange-900">
               Payment History
