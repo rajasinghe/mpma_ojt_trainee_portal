@@ -1,42 +1,99 @@
-import { Edit, FileText, Mail, Phone, MapPin, Calendar, User, AlertCircle } from 'lucide-react';
-import { useToastHelpers } from '../../hooks/useToast';
-import { ConfirmationModal } from '../../components/ui/ConfirmationModal';
+import {
+  Edit,
+  FileText,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  User,
+  AlertCircle,
+  FolderOpen,
+} from "lucide-react";
+import { useToastHelpers } from "../../hooks/useToast";
+import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
+import { DocumentViewer } from "../../components/ui/DocumentViewer";
 
 export default function TraineeDetails() {
   const { success } = useToastHelpers();
 
   // Mock data - in real app this would come from API
   const traineeDetails = {
-    firstName: 'John',
-    lastName: 'Doe',
-    nic: '199512345678',
-    dateOfBirth: '1995-05-15',
-    gender: 'Male',
-    address: '123 Main Street, Colombo 05, Sri Lanka',
-    phone: '+94 77 123 4567',
-    email: 'john.doe@email.com',
+    firstName: "John",
+    lastName: "Doe",
+    nic: "199512345678",
+    dateOfBirth: "1995-05-15",
+    gender: "Male",
+    address: "123 Main Street, Colombo 05, Sri Lanka",
+    phone: "+94 77 123 4567",
+    email: "john.doe@email.com",
     emergencyContact: {
-      name: 'Jane Doe',
-      phone: '+94 77 987 6543',
-      relation: 'Sister'
+      name: "Jane Doe",
+      phone: "+94 77 987 6543",
+      relation: "Sister",
     },
-    joinDate: '2024-01-15',
-    trainingProgram: 'Software Development',
-    batchNumber: 'SD-2024-01',
-    status: 'Active'
+    joinDate: "2024-01-15",
+    trainingProgram: "Software Development",
+    batchNumber: "SD-2024-01",
+    status: "Active",
   };
+
+  const documents = [
+    {
+      id: "1",
+      name: "NIC Copy.jpg",
+      type: "image" as const,
+      url: "https://images.pexels.com/photos/3768894/pexels-photo-3768894.jpeg?auto=compress&cs=tinysrgb&w=800",
+      uploadDate: "2024-01-10",
+      size: "2.1 MB",
+    },
+    {
+      id: "2",
+      name: "Birth Certificate.pdf",
+      type: "pdf" as const,
+      url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      uploadDate: "2024-01-10",
+      size: "1.5 MB",
+    },
+    {
+      id: "3",
+      name: "Educational Certificates.pdf",
+      type: "pdf" as const,
+      url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      uploadDate: "2024-01-12",
+      size: "3.2 MB",
+    },
+    {
+      id: "4",
+      name: "Profile Photo.jpg",
+      type: "image" as const,
+      url: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
+      uploadDate: "2024-01-08",
+      size: "1.8 MB",
+    },
+    {
+      id: "5",
+      name: "Medical Report.pdf",
+      type: "pdf" as const,
+      url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      uploadDate: "2024-01-15",
+      size: "2.7 MB",
+    },
+  ];
 
   const handleEditRequest = async () => {
     const confirmed = await ConfirmationModal.show({
-      title: 'Request Profile Edit',
-      message: 'Are you sure you want to request an edit to your profile? An admin will review and approve any changes.',
-      confirmText: 'Submit Request',
-      cancelText: 'Cancel'
+      title: "Request Profile Edit",
+      message:
+        "Are you sure you want to request an edit to your profile? An admin will review and approve any changes.",
+      confirmText: "Submit Request",
+      cancelText: "Cancel",
     });
 
     if (confirmed) {
       // In real app, this would send a request to admin
-      success('Edit request submitted successfully! Admin will review and approve changes.');
+      success(
+        "Edit request submitted successfully! Admin will review and approve changes."
+      );
     }
   };
 
@@ -49,7 +106,8 @@ export default function TraineeDetails() {
             {traineeDetails.firstName} {traineeDetails.lastName}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {traineeDetails.trainingProgram} - Batch {traineeDetails.batchNumber}
+            {traineeDetails.trainingProgram} - Batch{" "}
+            {traineeDetails.batchNumber}
           </p>
         </div>
         <button
@@ -242,6 +300,21 @@ export default function TraineeDetails() {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+      {/* Documents Section */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+            <FolderOpen className="h-5 w-5 mr-2" />
+            Documents
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Click on any document to view or download
+          </p>
+        </div>
+        <div className="p-6">
+          <DocumentViewer documents={documents} />
         </div>
       </div>
     </div>

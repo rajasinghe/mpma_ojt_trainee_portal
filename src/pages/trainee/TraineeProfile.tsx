@@ -8,7 +8,6 @@ import {
   User,
   Lock,
   Bell,
-  Globe,
   CreditCard,
   Building,
   Hash,
@@ -150,7 +149,6 @@ export default function TraineeProfile() {
     { id: "banking", name: "Bank Details", icon: CreditCard },
     { id: "security", name: "Security", icon: Lock },
     { id: "notifications", name: "Notifications", icon: Bell },
-    { id: "preferences", name: "Preferences", icon: Globe },
   ];
 
   return (
@@ -217,7 +215,7 @@ export default function TraineeProfile() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ValidatedInput
-                  label="Full Name"
+                  label="Username"
                   type="text"
                   required
                   value={profileData.name}
@@ -607,32 +605,6 @@ export default function TraineeProfile() {
                 <Save className="h-4 w-4 mr-2" />
                 Save Preferences
               </button>
-            </div>
-          )}
-
-          {/* Preferences Tab */}
-          {activeTab === "preferences" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900">
-                Application Preferences
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900">
-                      Language
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      Select your preferred language
-                    </p>
-                  </div>
-                  <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900">
-                    <option value="en">English</option>
-                    <option value="si">Sinhala</option>
-                    <option value="ta">Tamil</option>
-                  </select>
-                </div>
-              </div>
             </div>
           )}
         </div>

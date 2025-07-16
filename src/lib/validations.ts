@@ -62,6 +62,12 @@ export const documentsSchema = z.object({
     ),
 });
 
+const bankPaymentSchema = z.object({
+  paymentAmount: z.string().min(1, "Payment amount is required"),
+  paymentDate: z.string().min(1, "Payment date is required"),
+  bankReceipt: z.any().nullable(),
+});
+
 export const paymentSchema = z.object({
   cardNumber: z
     .string()
@@ -83,7 +89,7 @@ export const OnboardingSchema = z.object({
   personalDetails: personalDetailsSchema,
   contactInfo: contactInfoSchema,
   documents: documentsSchema,
-  payment: paymentSchema,
+  bankPayment: bankPaymentSchema,
 });
 
 // Profile validation schemas

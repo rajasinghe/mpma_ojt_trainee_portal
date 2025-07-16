@@ -1,10 +1,22 @@
-import { useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import { CreditCard, DollarSign, Calendar, TrendingUp, Download, Eye } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
-import type { LoaderData } from '../../loaders';
+import { useState } from "react";
+import { useLoaderData } from "react-router-dom";
+import {
+  CreditCard,
+  DollarSign,
+  Calendar,
+  TrendingUp,
+  Download,
+  Eye,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/Card";
+import Badge from "../../components/ui/Badge";
+import Button from "../../components/ui/Button";
+import type { LoaderData } from "../../loaders";
 
 interface PaymentData {
   totalEarned: number;
@@ -26,15 +38,22 @@ export default function TraineePayments() {
   const { data: paymentData } = useLoaderData() as LoaderData<PaymentData>;
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  const { totalEarned, pendingAmount, totalDays, totalWorkingDays, dailyPayment, payments } = paymentData;
+  const {
+    totalEarned,
+    pendingAmount,
+    totalDays,
+    totalWorkingDays,
+    dailyPayment,
+    payments,
+  } = paymentData;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'paid':
+      case "paid":
         return <Badge variant="success">Paid</Badge>;
-      case 'processing':
+      case "processing":
         return <Badge variant="warning">Processing</Badge>;
-      case 'pending':
+      case "pending":
         return <Badge variant="error">Pending</Badge>;
       default:
         return <Badge variant="default">{status}</Badge>;
@@ -46,7 +65,9 @@ export default function TraineePayments() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payment History</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Payment History
+          </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Track your daily training payments and earnings
           </p>
@@ -132,12 +153,21 @@ export default function TraineePayments() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-cyan-800">
               <div>
-                <p><strong>Daily Payment:</strong> Rs. {dailyPayment} per day</p>
-                <p><strong>Payment Schedule:</strong> Month after attendance confirmation</p>
+                <p>
+                  <strong>Daily Payment:</strong> Rs. {dailyPayment} per day
+                </p>
+                <p>
+                  <strong>Payment Schedule:</strong> Month after attendance
+                  confirmation
+                </p>
               </div>
               <div>
-                <p><strong>Method:</strong> Direct BOC bank transfer</p>
-                <p><strong>Is BOC Account Added:</strong> Yes</p>
+                <p>
+                  <strong>Method:</strong> Direct BOC bank transfer
+                </p>
+                <p>
+                  <strong>Is BOC Account Added:</strong> Yes
+                </p>
               </div>
             </div>
           </div>
@@ -191,11 +221,16 @@ export default function TraineePayments() {
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {payments.map((payment, index) => (
-                  <tr key={payment.id} className={`table-row-hover-${index % 2 === 0 ? 'green' : 'blue'}`}>
+                  <tr
+                    key={payment.id}
+                    className={`table-row-hover-${
+                      index % 2 === 0 ? "green" : "blue"
+                    }`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                        {(payment.month)}
+                        {payment.month}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -205,7 +240,7 @@ export default function TraineePayments() {
                       Rs. {payment.amount.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(payment.status? 'paid' : 'pending')}
+                      {getStatusBadge(payment.status ? "paid" : "pending")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Button variant="ghost" size="sm" icon={Eye}>
@@ -216,27 +251,6 @@ export default function TraineePayments() {
                 ))}
               </tbody>
             </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Initial Payment Info */}
-      <Card color="pink">
-        <CardHeader color="pink">
-          <CardTitle color="pink">Initial Payment Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-pink-50 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-pink-900">Registration Fee</h4>
-                <p className="text-sm text-pink-700">One-time payment made during onboarding</p>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-pink-900">Rs. 1,000</div>
-                <Badge variant="success">Paid</Badge>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>

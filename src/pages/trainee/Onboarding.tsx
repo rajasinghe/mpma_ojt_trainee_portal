@@ -9,13 +9,13 @@ import {
   Check,
   User,
   Phone,
-  CreditCard,
   Sparkles,
   Star,
-  Award,
   Camera,
   X,
   FileImage,
+  Building2,
+  Receipt,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -56,11 +56,10 @@ export default function Onboarding() {
       documents: {
         documents: [],
       },
-      payment: {
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
-        cardName: "",
+      bankPayment: {
+        paymentAmount: "",
+        paymentDate: "",
+        bankReceipt: null,
       },
     },
     resolver: zodResolver(OnboardingSchema),
@@ -96,15 +95,16 @@ export default function Onboarding() {
     },
     {
       id: 4,
-      name: "Initial Payment",
-      description: "Secure your spot with Rs. 1,000",
-      icon: CreditCard,
+      name: "Bank Payment",
+      description: "Upload bank receipt and payment details",
+      icon: Receipt,
       color: "from-orange-500 to-red-600",
     },
   ];
 
   const profilePhoto = watch("personalDetails.profilePhoto");
   const documents = watch("documents.documents");
+  const bankReceipt = watch("bankPayment.bankReceipt");
 
   /*
   const handleInputChange = (field: keyof FormData, value: string) => {
@@ -174,6 +174,23 @@ export default function Onboarding() {
     e.stopPropagation();
     setDragActive(false);
     handleFileUpload(e.dataTransfer.files);
+  };
+
+  const removeReceipt = () => {
+    setValue("bankPayment.bankReceipt", null);
+    success("Bank receipt removed");
+  };
+
+  const handleReceiptUpload = (file: File) => {
+    if (
+      file &&
+      (file.type.startsWith("image/") || file.type === "application/pdf")
+    ) {
+      setValue("bankPayment.bankReceipt", file);
+      success("Bank receipt uploaded successfully");
+    } else {
+      error("Please select a valid image or PDF file");
+    }
   };
 
   // validation function
@@ -250,48 +267,30 @@ export default function Onboarding() {
     }
   };
 
-  const onSubmitPayment: SubmitHandler<OnboardingFormData> = async (data) => {
+  const onSubmitBankPayment: SubmitHandler<OnboardingFormData> = async (
+    data
+  ) => {
     try {
-      const paymentData = data.payment;
+      if (!data.bankPayment.bankReceipt) {
+        error("Please upload your bank receipt");
+        return;
+      }
+      const bankPaymentData = data.bankPayment;
 
-      // Simulate payment processing
+      // Simulate bank payment processing
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      console.log("Payment data submitted:", paymentData);
+      console.log("Bank payment data submitted:", bankPaymentData);
 
       updateUser({ hasCompletedOnboarding: true });
-      success("Payment successful! Onboarding complete.");
+      success(
+        "Bank payment details submitted successfully! Onboarding complete."
+      );
       navigate("/trainee");
     } catch (err) {
-      error("Payment failed.");
+      error("Failed to submit bank payment details.");
     }
   };
-
-  /*
-  const onSubmit: SubmitHandler<OnboardingFormData> = async (data) => {
-    try {
-      const traineeData = {
-        personalDetails: data.personalDetails,
-        contactInfo: data.contactInfo,
-        documents: data.documents.documents,
-      };
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      console.log("Onboarding data submitted:", traineeData);
-
-      // Update user onboarding status
-      updateUser({ hasCompletedOnboarding: true });
-
-      success("Onboarding completed successfully! Welcome to OJT Portal!");
-
-      // Navigate to trainee dashboard
-      navigate("/trainee");
-    } catch (err) {
-      error("Payment processing failed. Please try again.");
-    }
-  };
-*/
 
   return (
     <div
@@ -380,7 +379,7 @@ export default function Onboarding() {
         {/* Form Content */}
         <Card className="max-w-2xl mx-auto bg-white shadow-xl border border-gray-200">
           <CardContent className="p-8">
-            <form onSubmit={handleSubmit(onSubmitPayment)}>
+            <form onSubmit={handleSubmit(onSubmitBankPayment)}>
               {/* Step 1: Personal Details */}
               {currentStep === 1 && (
                 <div className="space-y-6">
@@ -727,107 +726,195 @@ export default function Onboarding() {
                 </div>
               )}
 
-              {/* Step 4: Initial Payment */}
+              {/* Step 4: Bank Payment */}
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div className="text-center mb-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      Initial Payment
+                      Bank Payment Details
                     </h3>
                     <p className="text-gray-600">
-                      Secure your training spot with a one-time payment of Rs.
-                      1,000
+                      Upload your bank receipt and provide payment details for
+                      the BOC account transfer
                     </p>
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                      <div className="flex items-center justify-center space-x-2">
-                        <Star className="h-5 w-5 text-yellow-500" />
-                        <span className="text-sm font-medium text-blue-900">
-                          After this, you'll receive daily payments during your
-                          training!
-                        </span>
-                      </div>
-                    </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-6">
-                    <div className="flex items-center justify-between">
+                  {/* Bank Account Details */}
+                  <div className="bg-blue-50 p-6 rounded-lg mb-6">
+                    <div className="flex items-center mb-4">
+                      <Building2 className="h-6 w-6 text-blue-600 mr-2" />
+                      <h4 className="text-lg font-semibold text-gray-900">
+                        Bank of Ceylon (BOC) Account Details
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">
-                          Payment Amount
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          One-time registration fee
-                        </p>
+                        <span className="font-medium text-gray-700">
+                          Account Name:
+                        </span>
+                        <p className="text-gray-900">OJT Training Institute</p>
                       </div>
-                      <div className="text-3xl font-bold text-green-600">
-                        Rs. 1,000
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Account Number:
+                        </span>
+                        <p className="text-gray-900 font-mono">1234567890</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Branch:
+                        </span>
+                        <p className="text-gray-900">Colombo Main Branch</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Bank Code:
+                        </span>
+                        <p className="text-gray-900 font-mono">7010</p>
                       </div>
                     </div>
                   </div>
 
+                  {/* Payment Details Form */}
                   <div className="space-y-4">
-                    <Controller
-                      name="payment.cardName"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          label="Cardholder Name *"
-                          {...field}
-                          error={fieldState.error?.message}
-                          placeholder="Name as it appears on card"
-                          required
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="payment.cardNumber"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          label="Card Number *"
-                          {...field}
-                          error={fieldState.error?.message}
-                          placeholder="1234 5678 9012 3456"
-                          required
-                        />
-                      )}
-                    />
                     <div className="grid grid-cols-2 gap-4">
                       <Controller
-                        name="payment.expiryDate"
+                        name="bankPayment.paymentAmount"
                         control={control}
                         render={({ field, fieldState }) => (
                           <Input
-                            label="Expiry Date *"
+                            label="Payment Amount (Rs.) *"
                             {...field}
                             error={fieldState.error?.message}
-                            placeholder="MM/YY"
+                            placeholder="1000.00"
+                            type="number"
+                            step="0.01"
+                            min="0"
                             required
                           />
                         )}
                       />
                       <Controller
-                        name="payment.cvv"
+                        name="bankPayment.paymentDate"
                         control={control}
                         render={({ field, fieldState }) => (
                           <Input
-                            label="CVV *"
+                            label="Payment Date *"
                             {...field}
                             error={fieldState.error?.message}
-                            placeholder="123"
+                            type="date"
                             required
                           />
                         )}
                       />
                     </div>
+
+                    {/* Bank Receipt Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Bank Receipt *
+                      </label>
+
+                      {bankReceipt instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              {bankReceipt.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {bankReceipt.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(bankReceipt.size / 1024 / 1024).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={removeReceipt}
+                              type="button"
+                              className="text-red-600 hover:text-red-500 text-sm"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          {bankReceipt.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(bankReceipt)}
+                                alt="Bank Receipt Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <Receipt className="mx-auto h-12 w-12 text-gray-400" />
+                          <div className="mt-4">
+                            <label
+                              htmlFor="receipt-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium">
+                                Click to upload bank receipt
+                              </span>
+                              <span className="text-gray-600">
+                                {" "}
+                                or drag and drop
+                              </span>
+                            </label>
+                            <input
+                              id="receipt-upload"
+                              name="receipt-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleReceiptUpload(e.target.files[0])
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Award className="h-4 w-4" />
-                      <span>
-                        Your payment is secured with 256-bit SSL encryption
-                      </span>
+                  {/* Instructions */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <Star className="h-5 w-5 text-yellow-500 mt-0.5" />
+                      <div className="text-sm text-yellow-800">
+                        <p className="font-medium mb-1">
+                          Important Instructions:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>
+                            Make the payment to the BOC account details provided
+                            above
+                          </li>
+                          <li>
+                            Upload a clear photo or scan of your bank receipt
+                          </li>
+                          <li>
+                            Ensure the payment amount and date match your bank
+                            transaction
+                          </li>
+                          <li>
+                            Your application will be processed after payment
+                            verification
+                          </li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -866,7 +953,7 @@ export default function Onboarding() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSubmit(onSubmitPayment)} // Step 4: only payment
+                    //onClick={handleSubmit(onSubmitBankPayment)} // Step 4: only payment
                     loading={isSubmitting}
                     variant="primary"
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
