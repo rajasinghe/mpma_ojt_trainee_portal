@@ -20,7 +20,8 @@ html {
 body {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
   color: #1e293b !important;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   line-height: 1.6;
 }
 
@@ -28,7 +29,8 @@ body {
 .bg-white {
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
   color: #1e293b !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Colorful card variants */
@@ -314,7 +316,8 @@ nav a.active {
 /* Enhanced cards with hover effects */
 .card-hover:hover {
   transform: translateY(-4px) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
   transition: all 0.3s ease !important;
 }
 
@@ -329,7 +332,8 @@ nav a.active {
 
 .stats-card:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
 .stats-card-blue {
@@ -545,7 +549,8 @@ nav a.active {
 .dropdown-menu {
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
   border: 2px solid #e2e8f0 !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Enhanced tooltips */
@@ -562,7 +567,7 @@ nav a.active {
     padding: 16px !important;
     margin: 8px !important;
   }
-  
+
   .mobile-text {
     font-size: 14px !important;
     line-height: 1.5 !important;
@@ -584,11 +589,11 @@ nav a.active {
     background: #ffffff !important;
     border: 2px solid #000000 !important;
   }
-  
+
   .text-gray-900 {
     color: #000000 !important;
   }
-  
+
   .text-gray-600 {
     color: #333333 !important;
   }
@@ -624,5 +629,3 @@ nav a.active {
   background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%) !important;
   border: 1px solid #a5f3fc !important;
 }
-
-

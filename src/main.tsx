@@ -22,7 +22,7 @@ import Login from "./pages/Login";
 import Onboarding from "./pages/trainee/Onboarding";
 
 // Layouts
-import TraineeLayout from "./layouts/TraineeLayout";
+import TraineeLayout from "./components/layout/TraineeLayout";
 
 // Trainee Pages
 import TraineeDetails from "./pages/trainee/TraineeDetails";

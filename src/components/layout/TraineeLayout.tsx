@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import Header from "../components/layout/Header";
+import { useAuth } from "../../contexts/AuthContext";
+import Header from "./Header";
 import {
   User,
   Calendar,
