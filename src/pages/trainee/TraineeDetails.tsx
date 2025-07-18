@@ -90,7 +90,7 @@ export default function TraineeDetails() {
     });
 
     if (confirmed) {
-      // In real app, this would send a request to admin
+      // send a request to admin
       success(
         "Edit request submitted successfully! Admin will review and approve changes."
       );
@@ -131,7 +131,7 @@ export default function TraineeDetails() {
 
       {/* Personal Information */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-300">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <User className="h-5 w-5 mr-2" />
             Personal Information
@@ -187,7 +187,7 @@ export default function TraineeDetails() {
 
       {/* Contact Information */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-300">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <Phone className="h-5 w-5 mr-2" />
             Contact Information
@@ -219,7 +219,7 @@ export default function TraineeDetails() {
 
       {/* Emergency Contact */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-300">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <AlertCircle className="h-5 w-5 mr-2" />
             Emergency Contact
@@ -258,7 +258,7 @@ export default function TraineeDetails() {
 
       {/* Training Information */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-300">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <FileText className="h-5 w-5 mr-2" />
             Training Information
@@ -304,7 +304,7 @@ export default function TraineeDetails() {
       </div>
       {/* Documents Section */}
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-300">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center">
             <FolderOpen className="h-5 w-5 mr-2" />
             Documents

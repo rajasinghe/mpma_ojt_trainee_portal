@@ -67,6 +67,7 @@ export default function TraineeProfile() {
   // Form validation hooks
   const profileValidation = useFormValidation({
     schema: profileUpdateSchema,
+    mode: "onChange", // Enable real-time validation
     onSubmit: async (data: ProfileUpdateFormData) => {
       const confirmed = await ConfirmationModal.show({
         title: "Update Profile",
@@ -84,6 +85,7 @@ export default function TraineeProfile() {
 
   const bankValidation = useFormValidation({
     schema: bankDetailsSchema,
+    mode: "onChange",
     onSubmit: async (data: BankDetailsFormData) => {
       const confirmed = await ConfirmationModal.show({
         title: "Save Bank Details",
@@ -103,6 +105,7 @@ export default function TraineeProfile() {
 
   const passwordValidation = useFormValidation({
     schema: passwordChangeSchema,
+    mode: "onChange",
     onSubmit: async (data: PasswordChangeFormData) => {
       const confirmed = await ConfirmationModal.showWarning({
         title: "Change Password",
@@ -150,6 +153,25 @@ export default function TraineeProfile() {
     { id: "security", name: "Security", icon: Lock },
     { id: "notifications", name: "Notifications", icon: Bell },
   ];
+
+  // Update field change handlers
+  const handleProfileFieldChange = (
+    field: keyof ProfileUpdateFormData,
+    value: string
+  ) => {
+    const newData = { ...profileData, [field]: value };
+    setProfileData(newData);
+    profileValidation.handleFieldChange(field, value, newData);
+  };
+
+  const handleBankFieldChange = (
+    field: keyof BankDetailsFormData,
+    value: string
+  ) => {
+    const newData = { ...bankDetails, [field]: value };
+    setBankDetails(newData);
+    bankValidation.handleFieldChange(field, value, newData);
+  };
 
   return (
     <div className="space-y-6">
@@ -220,10 +242,14 @@ export default function TraineeProfile() {
                   required
                   value={profileData.name}
                   onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
+                    handleProfileFieldChange("name", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    profileValidation.handleFieldBlur(
+                      "name",
+                      e.target.value,
+                      profileData
+                    )
                   }
                   error={profileValidation.getFieldError("name")}
                 />
@@ -233,10 +259,14 @@ export default function TraineeProfile() {
                   required
                   value={profileData.email}
                   onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
+                    handleProfileFieldChange("email", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    profileValidation.handleFieldBlur(
+                      "email",
+                      e.target.value,
+                      profileData
+                    )
                   }
                   error={profileValidation.getFieldError("email")}
                 />
@@ -246,10 +276,14 @@ export default function TraineeProfile() {
                   required
                   value={profileData.phone}
                   onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      phone: e.target.value,
-                    }))
+                    handleProfileFieldChange("phone", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    profileValidation.handleFieldBlur(
+                      "phone",
+                      e.target.value,
+                      profileData
+                    )
                   }
                   error={profileValidation.getFieldError("phone")}
                   placeholder="+94 77 123 4567"
@@ -260,7 +294,14 @@ export default function TraineeProfile() {
                 rows={3}
                 value={profileData.bio}
                 onChange={(e) =>
-                  setProfileData((prev) => ({ ...prev, bio: e.target.value }))
+                  handleProfileFieldChange("bio", e.target.value)
+                }
+                onBlur={(e) =>
+                  profileValidation.handleFieldBlur(
+                    "bio",
+                    e.target.value,
+                    profileData
+                  )
                 }
                 error={profileValidation.getFieldError("bio")}
                 placeholder="Tell us about yourself..."
@@ -323,10 +364,14 @@ export default function TraineeProfile() {
                   required
                   value={bankDetails.accountHolderName}
                   onChange={(e) =>
-                    setBankDetails((prev) => ({
-                      ...prev,
-                      accountHolderName: e.target.value,
-                    }))
+                    handleBankFieldChange("accountHolderName", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    bankValidation.handleFieldBlur(
+                      "accountHolderName",
+                      e.target.value,
+                      bankDetails
+                    )
                   }
                   error={bankValidation.getFieldError("accountHolderName")}
                   placeholder="Enter account holder name"
@@ -347,10 +392,14 @@ export default function TraineeProfile() {
                   icon={Hash}
                   value={bankDetails.accountNo}
                   onChange={(e) =>
-                    setBankDetails((prev) => ({
-                      ...prev,
-                      accountNo: e.target.value.replace(/\D/g, ""),
-                    }))
+                    handleBankFieldChange("accountNo", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    bankValidation.handleFieldBlur(
+                      "accountNo",
+                      e.target.value,
+                      bankDetails
+                    )
                   }
                   error={bankValidation.getFieldError("accountNo")}
                   placeholder="Enter account number"
@@ -363,10 +412,14 @@ export default function TraineeProfile() {
                   icon={Hash}
                   value={bankDetails.branchCode}
                   onChange={(e) =>
-                    setBankDetails((prev) => ({
-                      ...prev,
-                      branchCode: e.target.value.toUpperCase(),
-                    }))
+                    handleBankFieldChange("branchCode", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    bankValidation.handleFieldBlur(
+                      "branchCode",
+                      e.target.value,
+                      bankDetails
+                    )
                   }
                   error={bankValidation.getFieldError("branchCode")}
                   placeholder="Enter branch code"

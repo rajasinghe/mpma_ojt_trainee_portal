@@ -62,11 +62,13 @@ export default function Onboarding() {
       },
       bankPayment: {
         paymentAmount: "",
+        accountNo: "",
         paymentDate: "",
         bankReceipt: null,
       },
     },
     resolver: zodResolver(OnboardingSchema),
+    mode: "onChange",
   });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -655,8 +657,8 @@ export default function Onboarding() {
 
               {/* Step 3: Documents */}
               {currentStep === 3 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-8">
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
                       Required Documents
                     </h3>
@@ -665,7 +667,7 @@ export default function Onboarding() {
                     </p>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                  <div className="bg-blue-50 p-3 rounded-lg mb-4">
                     <h4 className="font-medium text-blue-900 mb-2">
                       Required Documents:
                     </h4>
@@ -677,442 +679,239 @@ export default function Onboarding() {
                     </ul>
                   </div>
 
-                  {/* Individual Document Uploads */}
-                  <div className="space-y-6">
-                    {/* NIC Front */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        NIC Scan Front *
-                      </label>
-                      {nicFront instanceof File ? (
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center justify-between">
+                  {/* Compact Document Uploads with Drag & Drop */}
+                  <div className="space-y-3">
+                    {/* NIC Front and Back - Side by Side */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* NIC Front - Compact with Drag & Drop */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          NIC Scan Front *
+                        </label>
+                        {nicFront instanceof File ? (
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
                             <div className="flex items-center">
                               {nicFront.type === "application/pdf" ? (
-                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                                <FileText className="h-5 w-5 text-red-500 mr-2" />
                               ) : (
-                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                                <FileImage className="h-5 w-5 text-blue-500 mr-2" />
                               )}
                               <div>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-[120px]">
                                   {nicFront.name}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {(nicFront.size / 1024 / 1024).toFixed(2)} MB
+                                  {(nicFront.size / 1024 / 1024).toFixed(1)} MB
                                 </p>
                               </div>
                             </div>
                             <button
                               onClick={() => removeDocument("nicFront")}
                               type="button"
-                              className="text-red-600 hover:text-red-500 text-sm"
+                              className="text-red-600 hover:text-red-500"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           </div>
-                          {nicFront.type.startsWith("image/") && (
-                            <div className="mt-3">
-                              <img
-                                src={URL.createObjectURL(nicFront)}
-                                alt="NIC Front Preview"
-                                className="max-w-full h-32 object-contain rounded-lg border"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          onDragOver={(e) => handleDragOver(e, "nicFront")}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, "nicFront")}
-                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-                            ${
+                        ) : (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
                               dragActiveSection === "nicFront"
                                 ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
+                                : "border-gray-300 hover:border-blue-400"
                             }`}
-                        >
-                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                          <div className="mt-2">
+                            onDragOver={(e) => handleDragOver(e, "nicFront")}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, "nicFront")}
+                          >
+                            <Upload className="mx-auto h-5 w-5 text-gray-400 mb-1" />
                             <label
                               htmlFor="nic-front-upload"
                               className="cursor-pointer"
                             >
-                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
-                                Click to upload NIC Front or drag and drop
+                              <span className="text-blue-600 hover:text-blue-500 text-xs font-medium">
+                                Click or drag NIC Front
                               </span>
+                              <input
+                                id="nic-front-upload"
+                                type="file"
+                                className="sr-only"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                                onChange={(e) =>
+                                  e.target.files?.[0] &&
+                                  handleDocumentUpload(
+                                    e.target.files[0],
+                                    "nicFront"
+                                  )
+                                }
+                              />
                             </label>
-                            <input
-                              id="nic-front-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.png,.jpg,.jpeg"
-                              onChange={(e) =>
-                                e.target.files?.[0] &&
-                                handleDocumentUpload(
-                                  e.target.files[0],
-                                  "nicFront"
-                                )
-                              }
-                            />
+                            <span className="text-xs text-gray-500 mt-1">
+                              {" "}
+                              PDF, PNG, JPG
+                            </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            PDF, PNG, JPG up to 10MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
 
-                    {/* NIC Back */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        NIC Scan Back *
-                      </label>
-                      {nicBack instanceof File ? (
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center justify-between">
+                      {/* NIC Back - Compact with Drag & Drop */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          NIC Scan Back *
+                        </label>
+                        {nicBack instanceof File ? (
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
                             <div className="flex items-center">
                               {nicBack.type === "application/pdf" ? (
-                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                                <FileText className="h-5 w-5 text-red-500 mr-2" />
                               ) : (
-                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                                <FileImage className="h-5 w-5 text-blue-500 mr-2" />
                               )}
                               <div>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-[120px]">
                                   {nicBack.name}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {(nicBack.size / 1024 / 1024).toFixed(2)} MB
+                                  {(nicBack.size / 1024 / 1024).toFixed(1)} MB
                                 </p>
                               </div>
                             </div>
                             <button
                               onClick={() => removeDocument("nicBack")}
                               type="button"
-                              className="text-red-600 hover:text-red-500 text-sm"
+                              className="text-red-600 hover:text-red-500"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           </div>
-                          {nicBack.type.startsWith("image/") && (
-                            <div className="mt-3">
-                              <img
-                                src={URL.createObjectURL(nicBack)}
-                                alt="NIC Back Preview"
-                                className="max-w-full h-32 object-contain rounded-lg border"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          onDragOver={(e) => handleDragOver(e, "nicBack")}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, "nicBack")}
-                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-                            ${
+                        ) : (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
                               dragActiveSection === "nicBack"
                                 ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
+                                : "border-gray-300 hover:border-blue-400"
                             }`}
-                        >
-                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                          <div className="mt-2">
+                            onDragOver={(e) => handleDragOver(e, "nicBack")}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, "nicBack")}
+                          >
+                            <Upload className="mx-auto h-5 w-5 text-gray-400 mb-1" />
                             <label
                               htmlFor="nic-back-upload"
                               className="cursor-pointer"
                             >
-                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
-                                Click to upload NIC Back or drag and drop
+                              <span className="text-blue-600 hover:text-blue-500 text-xs font-medium">
+                                Click or drag NIC Back
                               </span>
+                              <input
+                                id="nic-back-upload"
+                                type="file"
+                                className="sr-only"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                                onChange={(e) =>
+                                  e.target.files?.[0] &&
+                                  handleDocumentUpload(
+                                    e.target.files[0],
+                                    "nicBack"
+                                  )
+                                }
+                              />
                             </label>
-                            <input
-                              id="nic-back-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.png,.jpg,.jpeg"
-                              onChange={(e) =>
-                                e.target.files?.[0] &&
-                                handleDocumentUpload(
-                                  e.target.files[0],
-                                  "nicBack"
-                                )
-                              }
-                            />
+                            <span className="text-xs text-gray-500 mt-1">
+                              {" "}
+                              PDF, PNG, JPG
+                            </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            PDF, PNG, JPG up to 10MB
-                          </p>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
 
-                    {/* Police Report */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Police Report *
-                      </label>
-                      {policeReport instanceof File ? (
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center justify-between">
+                    {/* Other Documents - Compact Single Column with Drag & Drop */}
+                    {[
+                      {
+                        key: "policeReport",
+                        label: "Police Report",
+                        file: policeReport,
+                      },
+                      {
+                        key: "birthCertificate",
+                        label: "Birth Certificate",
+                        file: birthCertificate,
+                      },
+                      {
+                        key: "instituteLetter",
+                        label: "Institute Letter",
+                        file: instituteLetter,
+                      },
+                    ].map(({ key, label, file }) => (
+                      <div key={key}>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {label} *
+                        </label>
+                        {file instanceof File ? (
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
                             <div className="flex items-center">
-                              {policeReport.type === "application/pdf" ? (
-                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              {file.type === "application/pdf" ? (
+                                <FileText className="h-5 w-5 text-red-500 mr-2" />
                               ) : (
-                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                                <FileImage className="h-5 w-5 text-blue-500 mr-2" />
                               )}
                               <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {policeReport.name}
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-[200px]">
+                                  {file.name}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {(policeReport.size / 1024 / 1024).toFixed(2)}{" "}
-                                  MB
+                                  {(file.size / 1024 / 1024).toFixed(1)} MB
                                 </p>
                               </div>
                             </div>
                             <button
-                              onClick={() => removeDocument("policeReport")}
+                              onClick={() => removeDocument(key)}
                               type="button"
-                              className="text-red-600 hover:text-red-500 text-sm"
+                              className="text-red-600 hover:text-red-500"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           </div>
-                          {policeReport.type.startsWith("image/") && (
-                            <div className="mt-3">
-                              <img
-                                src={URL.createObjectURL(policeReport)}
-                                alt="Police Report Preview"
-                                className="max-w-full h-32 object-contain rounded-lg border"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          onDragOver={(e) => handleDragOver(e, "policeReport")}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, "policeReport")}
-                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-                            ${
-                              dragActiveSection === "policeReport"
+                        ) : (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+                              dragActiveSection === key
                                 ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
+                                : "border-gray-300 hover:border-blue-400"
                             }`}
-                        >
-                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                          <div className="mt-2">
-                            <label
-                              htmlFor="police-report-upload"
-                              className="cursor-pointer"
-                            >
-                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
-                                Click to upload Police Report or drag and drop
+                            onDragOver={(e) => handleDragOver(e, key)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, key)}
+                          >
+                            <div className="flex items-center justify-center">
+                              <Upload className="h-5 w-5 text-gray-400 mr-2" />
+                              <label
+                                htmlFor={`${key}-upload`}
+                                className="cursor-pointer"
+                              >
+                                <span className="text-blue-600 hover:text-blue-500 text-xs font-medium">
+                                  Click or drag {label}
+                                </span>
+                                <input
+                                  id={`${key}-upload`}
+                                  type="file"
+                                  className="sr-only"
+                                  accept=".pdf,.png,.jpg,.jpeg"
+                                  onChange={(e) =>
+                                    e.target.files?.[0] &&
+                                    handleDocumentUpload(e.target.files[0], key)
+                                  }
+                                />
+                              </label>
+                              <span className="text-xs text-gray-500 ml-2">
+                                PDF, PNG, JPG
                               </span>
-                            </label>
-                            <input
-                              id="police-report-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.png,.jpg,.jpeg"
-                              onChange={(e) =>
-                                e.target.files?.[0] &&
-                                handleDocumentUpload(
-                                  e.target.files[0],
-                                  "policeReport"
-                                )
-                              }
-                            />
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            PDF, PNG, JPG up to 10MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Birth Certificate */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Birth Certificate *
-                      </label>
-                      {birthCertificate instanceof File ? (
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              {birthCertificate.type === "application/pdf" ? (
-                                <FileText className="h-8 w-8 text-red-500 mr-3" />
-                              ) : (
-                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
-                              )}
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {birthCertificate.name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {(
-                                    birthCertificate.size /
-                                    1024 /
-                                    1024
-                                  ).toFixed(2)}{" "}
-                                  MB
-                                </p>
-                              </div>
                             </div>
-                            <button
-                              onClick={() => removeDocument("birthCertificate")}
-                              type="button"
-                              className="text-red-600 hover:text-red-500 text-sm"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
                           </div>
-                          {birthCertificate.type.startsWith("image/") && (
-                            <div className="mt-3">
-                              <img
-                                src={URL.createObjectURL(birthCertificate)}
-                                alt="Birth Certificate Preview"
-                                className="max-w-full h-32 object-contain rounded-lg border"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          onDragOver={(e) =>
-                            handleDragOver(e, "birthCertificate")
-                          }
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, "birthCertificate")}
-                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-                            ${
-                              dragActiveSection === "birthCertificate"
-                                ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                        >
-                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                          <div className="mt-2">
-                            <label
-                              htmlFor="birth-certificate-upload"
-                              className="cursor-pointer"
-                            >
-                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
-                                Click to upload Birth Certificate or drag and
-                                drop
-                              </span>
-                            </label>
-                            <input
-                              id="birth-certificate-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.png,.jpg,.jpeg"
-                              onChange={(e) =>
-                                e.target.files?.[0] &&
-                                handleDocumentUpload(
-                                  e.target.files[0],
-                                  "birthCertificate"
-                                )
-                              }
-                            />
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            PDF, PNG, JPG up to 10MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Institute Letter */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Institute Letter *
-                      </label>
-                      {instituteLetter instanceof File ? (
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              {instituteLetter.type === "application/pdf" ? (
-                                <FileText className="h-8 w-8 text-red-500 mr-3" />
-                              ) : (
-                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
-                              )}
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {instituteLetter.name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {(instituteLetter.size / 1024 / 1024).toFixed(
-                                    2
-                                  )}{" "}
-                                  MB
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => removeDocument("instituteLetter")}
-                              type="button"
-                              className="text-red-600 hover:text-red-500 text-sm"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-                          {instituteLetter.type.startsWith("image/") && (
-                            <div className="mt-3">
-                              <img
-                                src={URL.createObjectURL(instituteLetter)}
-                                alt="Institute Letter Preview"
-                                className="max-w-full h-32 object-contain rounded-lg border"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          onDragOver={(e) =>
-                            handleDragOver(e, "instituteLetter")
-                          }
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, "instituteLetter")}
-                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-                            ${
-                              dragActiveSection === "instituteLetter"
-                                ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                        >
-                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                          <div className="mt-2">
-                            <label
-                              htmlFor="institute-letter-upload"
-                              className="cursor-pointer"
-                            >
-                              <span className="text-blue-600 hover:text-blue-500 font-medium text-sm">
-                                Click to upload Institute Letter or drag and
-                                drop
-                              </span>
-                            </label>
-                            <input
-                              id="institute-letter-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.png,.jpg,.jpeg"
-                              onChange={(e) =>
-                                e.target.files?.[0] &&
-                                handleDocumentUpload(
-                                  e.target.files[0],
-                                  "instituteLetter"
-                                )
-                              }
-                            />
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            PDF, PNG, JPG up to 10MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -1181,6 +980,19 @@ export default function Onboarding() {
                             type="number"
                             step="0.01"
                             min="0"
+                            required
+                          />
+                        )}
+                      />
+                      <Controller
+                        name="bankPayment.accountNo"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <Input
+                            label="Account Number *"
+                            {...field}
+                            error={fieldState.error?.message}
+                            placeholder="1234567890"
                             required
                           />
                         )}

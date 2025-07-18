@@ -69,6 +69,11 @@ const documentsSchema = z.object({
 
 const bankPaymentSchema = z.object({
   paymentAmount: z.string().min(1, "Payment amount is required"),
+  accountNo: z
+    .string()
+    .regex(/^\d+$/, "Account number must contain only numbers")
+    .min(8, "Account number must be at least 8 digits")
+    .max(20, "Account number must be less than 20 digits"),
   paymentDate: z.string().min(1, "Payment date is required"),
   bankReceipt: z
     .any()
