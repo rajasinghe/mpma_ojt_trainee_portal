@@ -1,16 +1,16 @@
-import alertify from 'alertifyjs';
-import 'alertifyjs/build/css/alertify.css';
-import 'alertifyjs/build/css/themes/default.css';
+import alertify from "alertifyjs";
+import "alertifyjs/build/css/alertify.css";
+import "alertifyjs/build/css/themes/default.css";
 
 // Configure AlertifyJS defaults
 alertify.defaults = {
   ...alertify.defaults,
   theme: {
-    input: 'ajs-input',
-    ok: 'ajs-ok',
-    cancel: 'ajs-cancel'
+    input: "ajs-input",
+    ok: "ajs-ok",
+    cancel: "ajs-cancel",
   },
-  transition: 'slide',
+  transition: "slide",
   resizable: true,
   maximizable: true,
   pinnable: true,
@@ -29,17 +29,17 @@ alertify.defaults = {
   autoReset: true,
   notifier: {
     delay: 5,
-    position: 'top-right',
-    closeButton: true
+    position: "top-right",
+    closeButton: true,
   },
   moveBounded: true,
-  moveSpeed: 300
+  moveSpeed: 300,
 };
 
 // Custom styling for AlertifyJS to match our design system
 const initializeAlertifyStyles = () => {
   // Inject custom CSS for AlertifyJS
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     /* AlertifyJS Custom Styling */
     .alertify .ajs-dialog {
@@ -79,7 +79,7 @@ const initializeAlertifyStyles = () => {
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       border: none;
       border-radius: 8px;
-      color: white;
+      color: #f8fafc !important;
       font-weight: 600;
       padding: 10px 20px;
       margin-left: 8px;
@@ -215,100 +215,105 @@ export interface ConfirmationOptions {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  type?: 'default' | 'destructive' | 'warning';
+  type?: "default" | "destructive" | "warning";
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void;
 }
 
 export class ConfirmationModal {
   static show({
-    title = 'Confirm Action',
+    title = "Confirm Action",
     message,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
-    type = 'default',
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+    type = "default",
     onConfirm,
-    onCancel
+    onCancel,
   }: ConfirmationOptions): Promise<boolean> {
     return new Promise((resolve) => {
       // Force AlertifyJS to create a fresh instance
       alertify.confirm().destroy();
-      
-      const dialog = alertify.confirm(title, message);
-      
+
+      const dialog = alertify.confirm(message);
+
+      // Set the title/header separately
+      dialog.set("title", title);
+
       // Customize button text
-      dialog.set('labels', { ok: confirmText, cancel: cancelText });
-      
+      dialog.set("labels", { ok: confirmText, cancel: cancelText });
+
       // Use setTimeout to ensure DOM is ready and prevent race conditions
-      dialog.set('onshow', function(this: any) {
+      dialog.set("onshow", function (this: any) {
         setTimeout(() => {
           try {
             // Get the dialog element
             const dialogElement = this.elements.dialog;
-            
+
             // Remove any existing duplicate buttons
-            const existingButtons = dialogElement.querySelectorAll('.ajs-button');
+            const existingButtons =
+              dialogElement.querySelectorAll(".ajs-button");
             existingButtons.forEach((btn: Element, index: number) => {
-              if (index >= 2) { // Keep only first 2 buttons
+              if (index >= 2) {
+                // Keep only first 2 buttons
                 btn.remove();
               }
             });
-            
+
             // Get the buttons after cleanup
-            const buttons = dialogElement.querySelectorAll('.ajs-button');
+            const buttons = dialogElement.querySelectorAll(".ajs-button");
             const okButton = buttons[0] as HTMLElement; // First button is OK
             const cancelButton = buttons[1] as HTMLElement; // Second button is Cancel
-            
+
             if (okButton && cancelButton) {
               // Reset button classes completely
-              okButton.className = 'ajs-button ajs-ok';
-              cancelButton.className = 'ajs-button ajs-cancel';
-              
+              okButton.className = "ajs-button ajs-ok";
+              cancelButton.className = "ajs-button ajs-cancel";
+
               // Set button text
               okButton.textContent = confirmText;
               cancelButton.textContent = cancelText;
-              
+
               // Add type-specific classes
-              if (type === 'destructive') {
-                okButton.classList.add('ajs-destructive');
+              if (type === "destructive") {
+                okButton.classList.add("ajs-destructive");
               }
-              
+
               // Mark as processed to prevent re-processing
-              okButton.setAttribute('data-processed', 'true');
-              cancelButton.setAttribute('data-processed', 'true');
+              okButton.setAttribute("data-processed", "true");
+              cancelButton.setAttribute("data-processed", "true");
             }
           } catch (error) {
-            console.error('Error styling AlertifyJS buttons:', error);
+            console.error("Error styling AlertifyJS buttons:", error);
           }
         }, 10); // Small delay to ensure DOM is ready
       });
-      
+
       // Clean up on close
-      dialog.set('onclose', function(this: any) {
+      dialog.set("onclose", function (this: any) {
         try {
           const dialogElement = this.elements.dialog;
-          const buttons = dialogElement.querySelectorAll('.ajs-button');
+          const buttons = dialogElement.querySelectorAll(".ajs-button");
           buttons.forEach((btn: Element) => {
-            btn.removeAttribute('data-processed');
+            btn.removeAttribute("data-processed");
           });
         } catch (error) {
-          console.error('Error cleaning up AlertifyJS:', error);
+          console.error("Error cleaning up AlertifyJS:", error);
         }
       });
-      
-      dialog.set('onok', async function() {
+
+      dialog.set("onok", async function () {
         try {
           if (onConfirm) {
             await onConfirm();
           }
           resolve(true);
         } catch (error) {
-          console.error('Error in confirmation callback:', error);
+          console.error("Error in confirmation callback:", error);
           resolve(false);
         }
       });
-      
-      dialog.set('oncancel', function() {
+
+      dialog.set("oncancel", function () {
         if (onCancel) {
           onCancel();
         }
@@ -317,21 +322,25 @@ export class ConfirmationModal {
     });
   }
 
-  static showDestructive(options: Omit<ConfirmationOptions, 'type'>): Promise<boolean> {
+  static showDestructive(
+    options: Omit<ConfirmationOptions, "type">
+  ): Promise<boolean> {
     return this.show({
       ...options,
-      type: 'destructive',
-      confirmText: options.confirmText || 'Delete',
-      title: options.title || 'Confirm Deletion'
+      type: "destructive",
+      confirmText: options.confirmText || "Delete",
+      title: options.title || "Confirm Deletion",
     });
   }
 
-  static showWarning(options: Omit<ConfirmationOptions, 'type'>): Promise<boolean> {
+  static showWarning(
+    options: Omit<ConfirmationOptions, "type">
+  ): Promise<boolean> {
     return this.show({
       ...options,
-      type: 'warning',
-      confirmText: options.confirmText || 'Proceed',
-      title: options.title || 'Warning'
+      type: "warning",
+      confirmText: options.confirmText || "Proceed",
+      title: options.title || "Warning",
     });
   }
 }

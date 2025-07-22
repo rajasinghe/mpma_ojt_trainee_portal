@@ -145,7 +145,7 @@ export default function TraineeCalendar() {
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-300 rounded-lg overflow-hidden">
           {/* Day headers */}
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div
@@ -198,7 +198,7 @@ export default function TraineeCalendar() {
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Legend 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Event Types
@@ -230,6 +230,7 @@ export default function TraineeCalendar() {
           </div>
         </div>
       </div>
+      */}
 
       {/* Upcoming Events */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">

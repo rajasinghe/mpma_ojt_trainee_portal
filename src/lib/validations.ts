@@ -57,13 +57,31 @@ export const contactInfoSchema = z.object({
   emergencyContactTelephone: phoneSchema,
 });
 
-export const documentsSchema = z.object({
-  documents: z
-    .array(z.instanceof(File))
-    .min(
-      3,
-      "At least 3 documents are required (NIC, Police report, Birth certificate)"
-    ),
+const documentsSchema = z.object({
+  nicFront: z.any().refine((file) => file !== null, "NIC Front is required"),
+  nicBack: z.any().refine((file) => file !== null, "NIC Back is required"),
+  policeReport: z
+    .any()
+    .refine((file) => file !== null, "Police Report is required"),
+  birthCertificate: z
+    .any()
+    .refine((file) => file !== null, "Birth Certificate is required"),
+  instituteLetter: z
+    .any()
+    .refine((file) => file !== null, "Institute Letter is required"),
+});
+
+const bankPaymentSchema = z.object({
+  paymentAmount: z.string().min(1, "Payment amount is required"),
+  accountNo: z
+    .string()
+    .regex(/^\d+$/, "Account number must contain only numbers")
+    .min(8, "Account number must be at least 8 digits")
+    .max(20, "Account number must be less than 20 digits"),
+  paymentDate: z.string().min(1, "Payment date is required"),
+  bankReceipt: z
+    .any()
+    .refine((file) => file !== null, "Institute Letter is required"),
 });
 
 export const paymentSchema = z.object({
@@ -87,7 +105,7 @@ export const OnboardingSchema = z.object({
   personalDetails: personalDetailsSchema,
   contactInfo: contactInfoSchema,
   documents: documentsSchema,
-  payment: paymentSchema,
+  bankPayment: bankPaymentSchema,
 });
 
 // Profile validation schemas

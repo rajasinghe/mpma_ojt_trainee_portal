@@ -9,13 +9,13 @@ import {
   Check,
   User,
   Phone,
-  CreditCard,
   Sparkles,
   Star,
-  Award,
   Camera,
   X,
   FileImage,
+  Building2,
+  Receipt,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -54,23 +54,30 @@ export default function Onboarding() {
         emergencyContactTelephone: "",
       },
       documents: {
-        documents: [],
+        nicFront: null,
+        nicBack: null,
+        policeReport: null,
+        birthCertificate: null,
+        instituteLetter: null,
       },
-      payment: {
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
-        cardName: "",
+      bankPayment: {
+        paymentAmount: "",
+        accountNo: "",
+        paymentDate: "",
+        bankReceipt: null,
       },
     },
     resolver: zodResolver(OnboardingSchema),
+    mode: "onChange",
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [dragActive, setDragActive] = useState(false);
   const { updateUser, logout } = useAuth();
   const navigate = useNavigate();
-  const { success, error, warning } = useToastHelpers();
+  const { success, error } = useToastHelpers();
+  const [dragActiveSection, setDragActiveSection] = useState<string | null>(
+    null
+  );
 
   const steps = [
     {
@@ -96,42 +103,39 @@ export default function Onboarding() {
     },
     {
       id: 4,
-      name: "Initial Payment",
-      description: "Secure your spot with Rs. 1,000",
-      icon: CreditCard,
+      name: "Bank Payment",
+      description: "Upload bank receipt and payment details",
+      icon: Receipt,
       color: "from-orange-500 to-red-600",
     },
   ];
 
   const profilePhoto = watch("personalDetails.profilePhoto");
-  const documents = watch("documents.documents");
+  const nicFront = watch("documents.nicFront");
+  const nicBack = watch("documents.nicBack");
+  const policeReport = watch("documents.policeReport");
+  const birthCertificate = watch("documents.birthCertificate");
+  const instituteLetter = watch("documents.instituteLetter");
+  const bankReceipt = watch("bankPayment.bankReceipt");
 
   /*
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 */
-  const handleFileUpload = (files: FileList | null) => {
-    if (files) {
-      const newFiles = Array.from(files).filter(
-        (file) =>
-          file.type === "application/pdf" || file.type.startsWith("image/")
+  const handleDocumentUpload = (file: File, documentType: string) => {
+    if (
+      file &&
+      (file.type.startsWith("image/") || file.type === "application/pdf")
+    ) {
+      setValue(`documents.${documentType}` as any, file);
+      success(
+        `${documentType
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())} uploaded successfully`
       );
-
-      if (newFiles.length !== files.length) {
-        warning(
-          "Some files were skipped. Only PDF and image files are allowed."
-        );
-      }
-
-      // Get the current documents
-      const currentDocs = getValues("documents.documents") || [];
-
-      setValue("documents.documents", [...currentDocs, ...newFiles]);
-
-      if (newFiles.length > 0) {
-        success(`${newFiles.length} file(s) uploaded successfully`);
-      }
+    } else {
+      error("Please select a valid image or PDF file");
     }
   };
 
@@ -144,14 +148,13 @@ export default function Onboarding() {
     }
   };
 
-  const removeDocument = (index: number) => {
-    const currentDocs = getValues("documents.documents") || [];
-    setValue(
-      "documents.documents",
-      currentDocs.filter((_, i) => i !== index)
+  const removeDocument = (documentType: string) => {
+    setValue(`documents.${documentType}` as any, null);
+    success(
+      `${documentType
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (str) => str.toUpperCase())} removed`
     );
-
-    success("Document removed");
   };
 
   const removePhoto = () => {
@@ -159,21 +162,44 @@ export default function Onboarding() {
     success("Profile photo removed");
   };
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, section: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
+    setDragActiveSection(section);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActiveSection(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, documentType: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActiveSection(null);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleDocumentUpload(file, documentType);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    handleFileUpload(e.dataTransfer.files);
+  const removeReceipt = () => {
+    setValue("bankPayment.bankReceipt", null);
+    success("Bank receipt removed");
+  };
+
+  const handleReceiptUpload = (file: File) => {
+    if (
+      file &&
+      (file.type.startsWith("image/") || file.type === "application/pdf")
+    ) {
+      setValue("bankPayment.bankReceipt", file);
+      success("Bank receipt uploaded successfully");
+    } else {
+      error("Please select a valid image or PDF file");
+    }
   };
 
   // validation function
@@ -201,9 +227,29 @@ export default function Onboarding() {
       } else if (currentStep === 2) {
         isValid = await trigger("contactInfo");
       } else if (currentStep === 3) {
-        isValid = await trigger("documents.documents");
-        if (!isValid && documents.length < 3) {
-          error("Please upload at least 3 documents");
+        isValid = await trigger("documents");
+        const docs = getValues("documents");
+        const requiredDocs = [
+          "nicFront",
+          "nicBack",
+          "policeReport",
+          "birthCertificate",
+          "instituteLetter",
+        ];
+        const missingDocs = requiredDocs.filter(
+          (doc) => !docs[doc as keyof typeof docs]
+        );
+
+        if (missingDocs.length > 0) {
+          error(
+            `Please upload all required documents: ${missingDocs
+              .map((doc) =>
+                doc
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/^./, (str) => str.toUpperCase())
+              )
+              .join(", ")}`
+          );
           return;
         }
         if (isValid) {
@@ -235,7 +281,7 @@ export default function Onboarding() {
       const traineeData = {
         personalDetails: data.personalDetails,
         contactInfo: data.contactInfo,
-        documents: data.documents.documents,
+        documents: data.documents,
       };
 
       // Simulate payment processing
@@ -250,48 +296,30 @@ export default function Onboarding() {
     }
   };
 
-  const onSubmitPayment: SubmitHandler<OnboardingFormData> = async (data) => {
+  const onSubmitBankPayment: SubmitHandler<OnboardingFormData> = async (
+    data
+  ) => {
     try {
-      const paymentData = data.payment;
+      if (!data.bankPayment.bankReceipt) {
+        error("Please upload your bank receipt");
+        return;
+      }
+      const bankPaymentData = data.bankPayment;
 
-      // Simulate payment processing
+      // Simulate bank payment processing
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      console.log("Payment data submitted:", paymentData);
+      console.log("Bank payment data submitted:", bankPaymentData);
 
       updateUser({ status: 2 }); //set trainee status to 2 (onboarding complete) as pending trainee
-      success("Payment successful! Onboarding complete.");
-      navigate("/trainee", { replace: true });
-    } catch (err) {
-      error("Payment failed.");
-    }
-  };
-
-  /*
-  const onSubmit: SubmitHandler<OnboardingFormData> = async (data) => {
-    try {
-      const traineeData = {
-        personalDetails: data.personalDetails,
-        contactInfo: data.contactInfo,
-        documents: data.documents.documents,
-      };
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      console.log("Onboarding data submitted:", traineeData);
-
-      // Update user onboarding status
-      updateUser({ hasCompletedOnboarding: true });
-
-      success("Onboarding completed successfully! Welcome to OJT Portal!");
-
-      // Navigate to trainee dashboard
+      success(
+        "Bank payment details submitted successfully! Onboarding complete."
+      );
       navigate("/trainee");
     } catch (err) {
-      error("Payment processing failed. Please try again.");
+      error("Failed to submit bank payment details.");
     }
   };
-*/
 
   return (
     <div
@@ -380,7 +408,7 @@ export default function Onboarding() {
         {/* Form Content */}
         <Card className="max-w-2xl mx-auto bg-white shadow-xl border border-gray-200">
           <CardContent className="p-8">
-            <form onSubmit={handleSubmit(onSubmitPayment)}>
+            <form onSubmit={handleSubmit(onSubmitBankPayment)}>
               {/* Step 1: Personal Details */}
               {currentStep === 1 && (
                 <div className="space-y-6">
@@ -405,7 +433,7 @@ export default function Onboarding() {
                             <img
                               src={URL.createObjectURL(profilePhoto)}
                               alt="Profile"
-                              className="w-24 h-24 rounded-full object-cover border-4 border-blue-500"
+                              className="w-24 h-24 rounded-lg object-cover border-4 border-blue-500"
                             />
                             <button
                               onClick={removePhoto}
@@ -417,7 +445,7 @@ export default function Onboarding() {
                           </div>
                         ) : (
                           <label className="cursor-pointer">
-                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors">
+                            <div className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors">
                               <Camera className="h-8 w-8 text-gray-400" />
                             </div>
                             <input
@@ -629,8 +657,8 @@ export default function Onboarding() {
 
               {/* Step 3: Documents */}
               {currentStep === 3 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-8">
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
                       Required Documents
                     </h3>
@@ -639,195 +667,457 @@ export default function Onboarding() {
                     </p>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                  <div className="bg-blue-50 p-3 rounded-lg mb-4">
                     <h4 className="font-medium text-blue-900 mb-2">
                       Required Documents:
                     </h4>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• NIC Scan (Front and Back)</li>
+                      <li>• NIC Scan Front and Back</li>
                       <li>• Police Report</li>
                       <li>• Birth Certificate</li>
+                      <li>• Institute Letter</li>
                     </ul>
                   </div>
 
-                  {/* Document Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Upload Documents *
-                    </label>
-                    <div
-                      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                        dragActive
-                          ? "border-blue-400 bg-blue-50"
-                          : "border-gray-300"
-                      }`}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                    >
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="mt-4">
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <span className="text-blue-600 hover:text-blue-500 font-medium">
-                            Click to upload
-                          </span>
-                          <span className="text-gray-600">
-                            {" "}
-                            or drag and drop
-                          </span>
+                  {/* Compact Document Uploads with Drag & Drop */}
+                  <div className="space-y-3">
+                    {/* NIC Front and Back - Side by Side */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* NIC Front - Compact with Drag & Drop */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          NIC Scan Front *
                         </label>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                          multiple
-                          accept=".pdf,.png,.jpg,.jpeg"
-                          onChange={(e) => handleFileUpload(e.target.files)}
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        PDF, PNG, JPG up to 10MB each
-                      </p>
-                    </div>
-
-                    {documents.length > 0 && (
-                      <div className="mt-4 space-y-3">
-                        <h4 className="text-sm font-medium text-gray-900">
-                          Uploaded Documents ({documents.length})
-                        </h4>
-                        {documents.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                          >
+                        {nicFront instanceof File ? (
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
                             <div className="flex items-center">
-                              <FileText className="h-5 w-5 text-gray-400 mr-3" />
+                              {nicFront.type === "application/pdf" ? (
+                                <FileText className="h-5 w-5 text-red-500 mr-2" />
+                              ) : (
+                                <FileImage className="h-5 w-5 text-blue-500 mr-2" />
+                              )}
                               <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {file.name}
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-[120px]">
+                                  {nicFront.name}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                                  {(nicFront.size / 1024 / 1024).toFixed(1)} MB
                                 </p>
                               </div>
                             </div>
                             <button
-                              onClick={() => removeDocument(index)}
-                              className="text-red-600 hover:text-red-500 text-sm"
+                              onClick={() => removeDocument("nicFront")}
+                              type="button"
+                              className="text-red-600 hover:text-red-500"
                             >
-                              Remove
+                              <X className="h-4 w-4" />
                             </button>
                           </div>
-                        ))}
+                        ) : (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+                              dragActiveSection === "nicFront"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-blue-400"
+                            }`}
+                            onDragOver={(e) => handleDragOver(e, "nicFront")}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, "nicFront")}
+                          >
+                            <Upload className="mx-auto h-5 w-5 text-gray-400 mb-1" />
+                            <label
+                              htmlFor="nic-front-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 text-xs font-medium">
+                                Click or drag NIC Front
+                              </span>
+                              <input
+                                id="nic-front-upload"
+                                type="file"
+                                className="sr-only"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                                onChange={(e) =>
+                                  e.target.files?.[0] &&
+                                  handleDocumentUpload(
+                                    e.target.files[0],
+                                    "nicFront"
+                                  )
+                                }
+                              />
+                            </label>
+                            <span className="text-xs text-gray-500 mt-1">
+                              {" "}
+                              PDF, PNG, JPG
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      {/* NIC Back - Compact with Drag & Drop */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          NIC Scan Back *
+                        </label>
+                        {nicBack instanceof File ? (
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                            <div className="flex items-center">
+                              {nicBack.type === "application/pdf" ? (
+                                <FileText className="h-5 w-5 text-red-500 mr-2" />
+                              ) : (
+                                <FileImage className="h-5 w-5 text-blue-500 mr-2" />
+                              )}
+                              <div>
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-[120px]">
+                                  {nicBack.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(nicBack.size / 1024 / 1024).toFixed(1)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeDocument("nicBack")}
+                              type="button"
+                              className="text-red-600 hover:text-red-500"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+                              dragActiveSection === "nicBack"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-blue-400"
+                            }`}
+                            onDragOver={(e) => handleDragOver(e, "nicBack")}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, "nicBack")}
+                          >
+                            <Upload className="mx-auto h-5 w-5 text-gray-400 mb-1" />
+                            <label
+                              htmlFor="nic-back-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 text-xs font-medium">
+                                Click or drag NIC Back
+                              </span>
+                              <input
+                                id="nic-back-upload"
+                                type="file"
+                                className="sr-only"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                                onChange={(e) =>
+                                  e.target.files?.[0] &&
+                                  handleDocumentUpload(
+                                    e.target.files[0],
+                                    "nicBack"
+                                  )
+                                }
+                              />
+                            </label>
+                            <span className="text-xs text-gray-500 mt-1">
+                              {" "}
+                              PDF, PNG, JPG
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Other Documents - Compact Single Column with Drag & Drop */}
+                    {[
+                      {
+                        key: "policeReport",
+                        label: "Police Report",
+                        file: policeReport,
+                      },
+                      {
+                        key: "birthCertificate",
+                        label: "Birth Certificate",
+                        file: birthCertificate,
+                      },
+                      {
+                        key: "instituteLetter",
+                        label: "Institute Letter",
+                        file: instituteLetter,
+                      },
+                    ].map(({ key, label, file }) => (
+                      <div key={key}>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {label} *
+                        </label>
+                        {file instanceof File ? (
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                            <div className="flex items-center">
+                              {file.type === "application/pdf" ? (
+                                <FileText className="h-5 w-5 text-red-500 mr-2" />
+                              ) : (
+                                <FileImage className="h-5 w-5 text-blue-500 mr-2" />
+                              )}
+                              <div>
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-[200px]">
+                                  {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(1)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeDocument(key)}
+                              type="button"
+                              className="text-red-600 hover:text-red-500"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+                              dragActiveSection === key
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-blue-400"
+                            }`}
+                            onDragOver={(e) => handleDragOver(e, key)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, key)}
+                          >
+                            <div className="flex items-center justify-center">
+                              <Upload className="h-5 w-5 text-gray-400 mr-2" />
+                              <label
+                                htmlFor={`${key}-upload`}
+                                className="cursor-pointer"
+                              >
+                                <span className="text-blue-600 hover:text-blue-500 text-xs font-medium">
+                                  Click or drag {label}
+                                </span>
+                                <input
+                                  id={`${key}-upload`}
+                                  type="file"
+                                  className="sr-only"
+                                  accept=".pdf,.png,.jpg,.jpeg"
+                                  onChange={(e) =>
+                                    e.target.files?.[0] &&
+                                    handleDocumentUpload(e.target.files[0], key)
+                                  }
+                                />
+                              </label>
+                              <span className="text-xs text-gray-500 ml-2">
+                                PDF, PNG, JPG
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Step 4: Initial Payment */}
+              {/* Step 4: Bank Payment */}
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div className="text-center mb-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      Initial Payment
+                      Bank Payment Details
                     </h3>
                     <p className="text-gray-600">
-                      Secure your training spot with a one-time payment of Rs.
-                      1,000
+                      Upload your bank receipt and provide payment details for
+                      the BOC account transfer
                     </p>
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                      <div className="flex items-center justify-center space-x-2">
-                        <Star className="h-5 w-5 text-yellow-500" />
-                        <span className="text-sm font-medium text-blue-900">
-                          After this, you'll receive daily payments during your
-                          training!
-                        </span>
-                      </div>
-                    </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-6">
-                    <div className="flex items-center justify-between">
+                  {/* Bank Account Details */}
+                  <div className="bg-blue-50 p-6 rounded-lg mb-6">
+                    <div className="flex items-center mb-4">
+                      <Building2 className="h-6 w-6 text-blue-600 mr-2" />
+                      <h4 className="text-lg font-semibold text-gray-900">
+                        Bank of Ceylon (BOC) Account Details
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">
-                          Payment Amount
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          One-time registration fee
-                        </p>
+                        <span className="font-medium text-gray-700">
+                          Account Name:
+                        </span>
+                        <p className="text-gray-900">OJT Training Institute</p>
                       </div>
-                      <div className="text-3xl font-bold text-green-600">
-                        Rs. 1,000
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Account Number:
+                        </span>
+                        <p className="text-gray-900 font-mono">1234567890</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Branch:
+                        </span>
+                        <p className="text-gray-900">Colombo Main Branch</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Bank Code:
+                        </span>
+                        <p className="text-gray-900 font-mono">7010</p>
                       </div>
                     </div>
                   </div>
 
+                  {/* Payment Details Form */}
                   <div className="space-y-4">
-                    <Controller
-                      name="payment.cardName"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          label="Cardholder Name *"
-                          {...field}
-                          error={fieldState.error?.message}
-                          placeholder="Name as it appears on card"
-                          required
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="payment.cardNumber"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          label="Card Number *"
-                          {...field}
-                          error={fieldState.error?.message}
-                          placeholder="1234 5678 9012 3456"
-                          required
-                        />
-                      )}
-                    />
                     <div className="grid grid-cols-2 gap-4">
                       <Controller
-                        name="payment.expiryDate"
+                        name="bankPayment.paymentAmount"
                         control={control}
                         render={({ field, fieldState }) => (
                           <Input
-                            label="Expiry Date *"
+                            label="Payment Amount (Rs.) *"
                             {...field}
                             error={fieldState.error?.message}
-                            placeholder="MM/YY"
+                            placeholder="1000.00"
+                            type="number"
+                            step="0.01"
+                            min="0"
                             required
                           />
                         )}
                       />
                       <Controller
-                        name="payment.cvv"
+                        name="bankPayment.accountNo"
                         control={control}
                         render={({ field, fieldState }) => (
                           <Input
-                            label="CVV *"
+                            label="Account Number *"
                             {...field}
                             error={fieldState.error?.message}
-                            placeholder="123"
+                            placeholder="1234567890"
+                            required
+                          />
+                        )}
+                      />
+                      <Controller
+                        name="bankPayment.paymentDate"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <Input
+                            label="Payment Date *"
+                            {...field}
+                            error={fieldState.error?.message}
+                            type="date"
                             required
                           />
                         )}
                       />
                     </div>
+
+                    {/* Bank Receipt Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Bank Receipt *
+                      </label>
+
+                      {bankReceipt instanceof File ? (
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              {bankReceipt.type === "application/pdf" ? (
+                                <FileText className="h-8 w-8 text-red-500 mr-3" />
+                              ) : (
+                                <FileImage className="h-8 w-8 text-blue-500 mr-3" />
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {bankReceipt.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(bankReceipt.size / 1024 / 1024).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={removeReceipt}
+                              type="button"
+                              className="text-red-600 hover:text-red-500 text-sm"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          {bankReceipt.type.startsWith("image/") && (
+                            <div className="mt-3">
+                              <img
+                                src={URL.createObjectURL(bankReceipt)}
+                                alt="Bank Receipt Preview"
+                                className="max-w-full h-32 object-contain rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <Receipt className="mx-auto h-12 w-12 text-gray-400" />
+                          <div className="mt-4">
+                            <label
+                              htmlFor="receipt-upload"
+                              className="cursor-pointer"
+                            >
+                              <span className="text-blue-600 hover:text-blue-500 font-medium">
+                                Click to upload bank receipt
+                              </span>
+                              <span className="text-gray-600">
+                                {" "}
+                                or drag and drop
+                              </span>
+                            </label>
+                            <input
+                              id="receipt-upload"
+                              name="receipt-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) =>
+                                e.target.files?.[0] &&
+                                handleReceiptUpload(e.target.files[0])
+                              }
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            PDF, PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Award className="h-4 w-4" />
-                      <span>
-                        Your payment is secured with 256-bit SSL encryption
-                      </span>
+                  {/* Instructions */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <Star className="h-5 w-5 text-yellow-500 mt-0.5" />
+                      <div className="text-sm text-yellow-800">
+                        <p className="font-medium mb-1">
+                          Important Instructions:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>
+                            Make the payment to the BOC account details provided
+                            above
+                          </li>
+                          <li>
+                            Upload a clear photo or scan of your bank receipt
+                          </li>
+                          <li>
+                            Ensure the payment amount and date match your bank
+                            transaction
+                          </li>
+                          <li>
+                            Your application will be processed after payment
+                            verification
+                          </li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -866,7 +1156,7 @@ export default function Onboarding() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSubmit(onSubmitPayment)} // Step 4: only payment
+                    //onClick={handleSubmit(onSubmitBankPayment)} // Step 4: only payment
                     loading={isSubmitting}
                     variant="primary"
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"

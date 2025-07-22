@@ -15,7 +15,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import {
   traineePaymentsLoader,
   traineeAttendanceLoader,
-  traineeCalendarLoader,
 } from "./loaders/traineeLoaders";
 
 // Auth Pages
@@ -23,7 +22,7 @@ import Login from "./pages/Login";
 import Onboarding from "./pages/trainee/Onboarding";
 
 // Layouts
-import TraineeLayout from "./layouts/TraineeLayout";
+import TraineeLayout from "./components/layout/TraineeLayout";
 
 // Trainee Pages
 import TraineeDetails from "./pages/trainee/TraineeDetails";
@@ -33,6 +32,7 @@ import TraineeCalendar from "./pages/trainee/TraineeCalendar";
 import TraineeNotifications from "./pages/trainee/TraineeNotifications";
 import TraineeChat from "./pages/trainee/TraineeChat";
 import TraineeProfile from "./pages/trainee/TraineeProfile";
+import TraineeSchedule from "./pages/trainee/TraineeSchedule";
 
 export const router = createBrowserRouter([
   {
@@ -68,6 +68,10 @@ export const router = createBrowserRouter([
         element: <TraineeDetails />,
       },
       {
+        path: "schedule",
+        element: <TraineeSchedule />,
+      },
+      {
         path: "attendance",
         element: <TraineeAttendance />,
         loader: traineeAttendanceLoader,
@@ -80,7 +84,6 @@ export const router = createBrowserRouter([
       {
         path: "calendar",
         element: <TraineeCalendar />,
-        loader: traineeCalendarLoader,
       },
       {
         path: "notifications",
