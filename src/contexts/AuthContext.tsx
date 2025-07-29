@@ -10,10 +10,10 @@ import api from "../api";
 
 export interface User {
   id: string;
-  nic: string;
+  nickname: string;
+  NIC: string;
   username: string;
-  email: string;
-  status: number;
+  status: string;
 }
 
 interface AuthContextType {

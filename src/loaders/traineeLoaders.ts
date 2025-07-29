@@ -202,9 +202,25 @@ const traineeEventLoader = async (): Promise<CalenderData[]> => {
   }
 };
 
+const getTraineeDetails = async (params: any) => {
+  try {
+    const response = await api.get(`api/trainee/trainee_details/${params.id}`);
+
+    if (response.status === 200) {
+      console.log("trainee data", response.data);
+      return response.data;
+    }
+
+    return {}; // Return empty object if no data
+  } catch (error) {
+    console.error("Error fetching trainee data:", error);
+    return {}; // Return empty object on error
+  }
+};
+
 // Export the loader
+export const traineeDetailsLoader = getTraineeDetails;
 export const traineeCalendarLoader = createLoader(traineeEventLoader, 600);
 
 export const traineePaymentsLoader = createLoader(loadTraineePayments, 600);
 export const traineeAttendanceLoader = createLoader(loadTraineeAttendance, 600);
-//export const

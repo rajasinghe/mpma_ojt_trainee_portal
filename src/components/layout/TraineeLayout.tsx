@@ -121,7 +121,7 @@ export default function TraineeLayout() {
               return (
                 <NavLink
                   key={item.name}
-                  to={item.href}
+                  to={item.href + `/${user?.id}`}
                   onClick={onItemClick}
                   className={({ isActive }) =>
                     `group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${

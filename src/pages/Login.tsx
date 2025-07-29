@@ -22,6 +22,7 @@ export default function Login() {
         setLoginError("");
         try {
           const success = await login(data.username, data.password);
+          console.log("Login success:", success);
           if (!success) {
             setLoginError("Login failed. Please check your credentials.");
           }
@@ -36,11 +37,11 @@ export default function Login() {
     });
 
   if (user) {
-    if (!user.status || user.status === 0) {
+    if (!user.status || user.status == "Pending") {
       return <Navigate to="/onboarding" replace />;
     }
 
-    if (user.status === 2) {
+    if (user.status == "Active") {
       return <Navigate to="/trainee" replace />;
     }
   }

@@ -15,6 +15,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import {
   traineePaymentsLoader,
   traineeAttendanceLoader,
+  traineeCalendarLoader,
+  traineeDetailsLoader,
 } from "./loaders/traineeLoaders";
 
 // Auth Pages
@@ -61,29 +63,31 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/trainee/details" replace />,
+        element: <Navigate to="details" replace />,
       },
       {
-        path: "details",
+        path: "details/:id",
         element: <TraineeDetails />,
+        loader: traineeDetailsLoader,
       },
       {
-        path: "schedule",
+        path: "schedule/:id",
         element: <TraineeSchedule />,
       },
       {
-        path: "attendance",
+        path: "attendance/:id",
         element: <TraineeAttendance />,
         loader: traineeAttendanceLoader,
       },
       {
-        path: "payments",
+        path: "payments/:id",
         element: <TraineePayments />,
         loader: traineePaymentsLoader,
       },
       {
         path: "calendar",
         element: <TraineeCalendar />,
+        loader: traineeCalendarLoader,
       },
       {
         path: "notifications",
@@ -94,7 +98,7 @@ export const router = createBrowserRouter([
         element: <TraineeChat />,
       },
       {
-        path: "profile",
+        path: "profile/:id",
         element: <TraineeProfile />,
       },
     ],

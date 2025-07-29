@@ -23,11 +23,11 @@ export default function ProtectedRoute({
   }
 
   if (requiresOnboarding) {
-    if (!user.status || user.status === 0) {
+    if (!user.status || user.status == "Pending") {
       return <Navigate to="/onboarding" replace />;
     }
   } else {
-    if (user.status && (user.status === 1 || user.status === 2)) {
+    if (user.status && user.status == "Active") {
       return <Navigate to="/trainee" replace />;
     }
   }

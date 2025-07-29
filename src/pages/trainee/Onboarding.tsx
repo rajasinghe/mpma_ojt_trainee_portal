@@ -24,6 +24,7 @@ import { useToastHelpers } from "../../hooks/useToast";
 import { OnboardingSchema, OnboardingFormData } from "../../lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import api from "../../api";
 
 export default function Onboarding() {
   const {
@@ -72,7 +73,7 @@ export default function Onboarding() {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const { updateUser, logout } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const { success, error } = useToastHelpers();
   const [dragActiveSection, setDragActiveSection] = useState<string | null>(
@@ -278,20 +279,78 @@ export default function Onboarding() {
     data
   ) => {
     try {
-      const traineeData = {
-        personalDetails: data.personalDetails,
-        contactInfo: data.contactInfo,
-        documents: data.documents,
-      };
+      const formData = new FormData();
 
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Personal details
+      formData.append("personalDetails[name]", data.personalDetails.name);
+      formData.append(
+        "personalDetails[fullname]",
+        data.personalDetails.fullname
+      );
+      formData.append("personalDetails[nicNo]", data.personalDetails.nicNo);
+      formData.append("personalDetails[address]", data.personalDetails.address);
+      formData.append(
+        "personalDetails[trainingInstitute]",
+        data.personalDetails.trainingInstitute
+      );
+      formData.append("personalDetails[course]", data.personalDetails.course);
 
-      console.log("Trainee data submitted:", traineeData);
+      if (data.personalDetails.profilePhoto) {
+        formData.append(
+          "personalDetails[profilePhoto]",
+          data.personalDetails.profilePhoto
+        );
+      }
+
+      // Contact info
+      formData.append("contactInfo[mobileNo]", data.contactInfo.mobileNo);
+      formData.append("contactInfo[residenceNo]", data.contactInfo.residenceNo);
+      formData.append("contactInfo[email]", data.contactInfo.email);
+      formData.append(
+        "contactInfo[emergencyContactName]",
+        data.contactInfo.emergencyContactName
+      );
+      formData.append(
+        "contactInfo[emergencyContactTelephone]",
+        data.contactInfo.emergencyContactTelephone
+      );
+
+      // Documents
+      if (data.documents.nicFront)
+        formData.append("documents[nicFront]", data.documents.nicFront);
+      if (data.documents.nicBack)
+        formData.append("documents[nicBack]", data.documents.nicBack);
+      if (data.documents.policeReport)
+        formData.append("documents[policeReport]", data.documents.policeReport);
+      if (data.documents.birthCertificate)
+        formData.append(
+          "documents[birthCertificate]",
+          data.documents.birthCertificate
+        );
+      if (data.documents.instituteLetter)
+        formData.append(
+          "documents[instituteLetter]",
+          data.documents.instituteLetter
+        );
+
+      formData.append("user_id", user?.id?.toString() || "");
+
+      // Debug FormData contents
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await api.post("api/trainee/information", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       success("Trainee data submitted successfully!");
-      setCurrentStep(4); // go to next step
+      setCurrentStep(4);
     } catch (err) {
+      console.error("Error submitting trainee data:", err);
       error("Failed to submit trainee data.");
     }
   };
@@ -304,14 +363,24 @@ export default function Onboarding() {
         error("Please upload your bank receipt");
         return;
       }
-      const bankPaymentData = data.bankPayment;
 
-      // Simulate bank payment processing
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const formData = new FormData();
+      formData.append(
+        "bankPayment[paymentAmount]",
+        data.bankPayment.paymentAmount
+      );
+      formData.append("bankPayment[accountNo]", data.bankPayment.accountNo);
+      formData.append("bankPayment[paymentDate]", data.bankPayment.paymentDate);
+      formData.append("bankPayment[bankReceipt]", data.bankPayment.bankReceipt);
+      formData.append("user_id", user?.id?.toString() || "");
 
-      console.log("Bank payment data submitted:", bankPaymentData);
+      const response = await api.post("api/trainee/payment", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      updateUser({ status: 2 }); //set trainee status to 2 (onboarding complete) as pending trainee
+      updateUser({ status: "Active" });
       success(
         "Bank payment details submitted successfully! Onboarding complete."
       );
@@ -1156,7 +1225,7 @@ export default function Onboarding() {
                   </Button>
                 ) : (
                   <Button
-                    //onClick={handleSubmit(onSubmitBankPayment)} // Step 4: only payment
+                    onClick={handleSubmit(onSubmitBankPayment)} // Step 4: only payment
                     loading={isSubmitting}
                     variant="primary"
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"

@@ -12,11 +12,16 @@ import {
 import { useToastHelpers } from "../../hooks/useToast";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { DocumentViewer } from "../../components/ui/DocumentViewer";
+import { useLoaderData } from "react-router-dom";
+import type { LoaderData } from "../../loaders";
 
 export default function TraineeDetails() {
   const { success } = useToastHelpers();
 
   // Mock data - in real app this would come from API
+  const { data: traineeDetailsLoader } = useLoaderData() as LoaderData<any>;
+
+  /*
   const traineeDetails = {
     firstName: "John",
     lastName: "Doe",
@@ -36,7 +41,7 @@ export default function TraineeDetails() {
     batchNumber: "SD-2024-01",
     status: "Active",
   };
-
+*/
   const documents = [
     {
       id: "1",
@@ -103,11 +108,11 @@ export default function TraineeDetails() {
       <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {traineeDetails.firstName} {traineeDetails.lastName}
+            {traineeDetailsLoader.Name}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {traineeDetails.trainingProgram} - Batch{" "}
-            {traineeDetails.batchNumber}
+            {traineeDetailsLoader.trainingProgram} - Batch{" "}
+            {traineeDetailsLoader.batchNumber}
           </p>
         </div>
         <button
@@ -124,7 +129,7 @@ export default function TraineeDetails() {
         <div className="flex items-center">
           <div className="h-3 w-3 bg-green-500 rounded-full mr-3"></div>
           <span className="text-green-800 dark:text-green-200 font-medium">
-            Training Status: {traineeDetails.status}
+            Training Status: {traineeDetailsLoader.status}
           </span>
         </div>
       </div>
@@ -144,7 +149,7 @@ export default function TraineeDetails() {
                 Full Name
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.firstName} {traineeDetails.lastName}
+                {traineeDetailsLoader.fullname}
               </p>
             </div>
             <div>
@@ -152,7 +157,7 @@ export default function TraineeDetails() {
                 NIC Number
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.nic}
+                {traineeDetailsLoader.NIC}
               </p>
             </div>
             <div>
@@ -161,7 +166,9 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                {new Date(traineeDetails.dateOfBirth).toLocaleDateString()}
+                {new Date(
+                  traineeDetailsLoader.dateOfBirth
+                ).toLocaleDateString()}
               </p>
             </div>
             <div>
@@ -169,7 +176,7 @@ export default function TraineeDetails() {
                 Gender
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.gender}
+                {traineeDetailsLoader.gender}
               </p>
             </div>
             <div className="md:col-span-2">
@@ -178,7 +185,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-start">
                 <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-1 flex-shrink-0" />
-                {traineeDetails.address}
+                {traineeDetailsLoader.address}
               </p>
             </div>
           </div>
@@ -201,7 +208,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                {traineeDetails.phone}
+                {traineeDetailsLoader.phone}
               </p>
             </div>
             <div>
@@ -210,7 +217,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                {traineeDetails.email}
+                {traineeDetailsLoader.email}
               </p>
             </div>
           </div>
@@ -232,7 +239,7 @@ export default function TraineeDetails() {
                 Contact Name
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.emergencyContact.name}
+                {traineeDetailsLoader.emergencyContact.name}
               </p>
             </div>
             <div>
@@ -241,7 +248,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                {traineeDetails.emergencyContact.phone}
+                {traineeDetailsLoader.emergencyContact.phone}
               </p>
             </div>
             <div>
@@ -249,7 +256,7 @@ export default function TraineeDetails() {
                 Relationship
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.emergencyContact.relation}
+                {traineeDetailsLoader.emergencyContact.relation}
               </p>
             </div>
           </div>
@@ -271,7 +278,7 @@ export default function TraineeDetails() {
                 Training Program
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.trainingProgram}
+                {traineeDetailsLoader.trainingProgram}
               </p>
             </div>
             <div>
@@ -279,7 +286,7 @@ export default function TraineeDetails() {
                 Batch Number
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetails.batchNumber}
+                {traineeDetailsLoader.batchNumber}
               </p>
             </div>
             <div>
@@ -288,7 +295,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                {new Date(traineeDetails.joinDate).toLocaleDateString()}
+                {new Date(traineeDetailsLoader.joinDate).toLocaleDateString()}
               </p>
             </div>
             <div>
@@ -296,7 +303,7 @@ export default function TraineeDetails() {
                 Current Status
               </label>
               <p className="mt-1 text-green-600 dark:text-green-400 font-medium">
-                {traineeDetails.status}
+                {traineeDetailsLoader.status}
               </p>
             </div>
           </div>
