@@ -66,21 +66,21 @@ export const router = createBrowserRouter([
         element: <Navigate to="details" replace />,
       },
       {
-        path: "details/:id",
+        path: "details",
         element: <TraineeDetails />,
         loader: traineeDetailsLoader,
       },
       {
-        path: "schedule/:id",
+        path: "schedule",
         element: <TraineeSchedule />,
       },
       {
-        path: "attendance/:id",
+        path: "attendance",
         element: <TraineeAttendance />,
         loader: traineeAttendanceLoader,
       },
       {
-        path: "payments/:id",
+        path: "payments",
         element: <TraineePayments />,
         loader: traineePaymentsLoader,
       },
@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
         element: <TraineeChat />,
       },
       {
-        path: "profile/:id",
+        path: "profile",
         element: <TraineeProfile />,
       },
     ],

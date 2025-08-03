@@ -1,6 +1,15 @@
 import api from "../api";
 import { createLoader, simulateApiDelay } from "./index";
 
+// Helper function to get current user from localStorage
+const getCurrentUser = () => {
+  const storedUser = localStorage.getItem("ojt_user");
+  if (storedUser) {
+    return JSON.parse(storedUser);
+  }
+  throw new Error("No authenticated user found");
+};
+
 // Trainee Payment Data
 interface PaymentData {
   totalEarned: number;
@@ -202,9 +211,9 @@ const traineeEventLoader = async (): Promise<CalenderData[]> => {
   }
 };
 
-const getTraineeDetails = async (params: any) => {
+const fetchTraineeDetails = async (id: number) => {
   try {
-    const response = await api.get(`api/trainee/trainee_details/${params.id}`);
+    const response = await api.get(`api/trainee/trainee_details/${id}`);
 
     if (response.status === 200) {
       console.log("trainee data", response.data);
@@ -218,8 +227,31 @@ const getTraineeDetails = async (params: any) => {
   }
 };
 
+const getTraineeDocuments = async (id: number) => {
+  try {
+    const response = await api.get(`api/trainee/document/${id}`);
+
+    if (response.status === 200) {
+      return response.data;
+    }
+
+    return {}; // Return empty object if no data
+  } catch (error) {
+    console.error("Error fetching trainee documents:", error);
+    return {}; // Return empty object on error
+  }
+};
+
 // Export the loader
-export const traineeDetailsLoader = getTraineeDetails;
+export const traineeDetailsLoader = async () => {
+  // Get user from auth context or session
+  const user = getCurrentUser();
+  const traineeData = await fetchTraineeDetails(user.id);
+  const documents = await getTraineeDocuments(user.id);
+  return { ...traineeData, Documents: documents };
+};
+
+console.log("trainee data loader", traineeDetailsLoader());
 export const traineeCalendarLoader = createLoader(traineeEventLoader, 600);
 
 export const traineePaymentsLoader = createLoader(loadTraineePayments, 600);

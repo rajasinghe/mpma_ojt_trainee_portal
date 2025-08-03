@@ -76,8 +76,17 @@ export default function TraineeCalendar() {
   };
 
   const getEventsForDate = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
-    return events.filter((event) => event.date === dateString);
+    const localDateString =
+      date.getFullYear() +
+      "-" +
+      String(date.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(date.getDate()).padStart(2, "0");
+
+    const eventDate = events.filter(
+      (event) => event.date.split("T")[0] === localDateString
+    );
+    return eventDate;
   };
 
   const getEventTypeColor = (type: string) => {

@@ -19,7 +19,9 @@ export default function TraineeDetails() {
   const { success } = useToastHelpers();
 
   // Mock data - in real app this would come from API
-  const { data: traineeDetailsLoader } = useLoaderData() as LoaderData<any>;
+  const loaderData = useLoaderData() as LoaderData<any>;
+
+  console.log("trainee data", loaderData);
 
   /*
   const traineeDetails = {
@@ -47,43 +49,51 @@ export default function TraineeDetails() {
       id: "1",
       name: "NIC Copy.jpg",
       type: "image" as const,
-      url: "https://images.pexels.com/photos/3768894/pexels-photo-3768894.jpeg?auto=compress&cs=tinysrgb&w=800",
+      url: loaderData?.Documents?.nicFront || "",
       uploadDate: "2024-01-10",
       size: "2.1 MB",
     },
     {
       id: "2",
+      name: "NIC Copy.jpg",
+      type: "image" as const,
+      url: loaderData?.Documents?.nicBack || "",
+      uploadDate: "2024-01-10",
+      size: "2.1 MB",
+    },
+    {
+      id: "3",
       name: "Birth Certificate.pdf",
       type: "pdf" as const,
-      url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      url: loaderData?.Documents?.birthCertificate || "",
       uploadDate: "2024-01-10",
       size: "1.5 MB",
     },
     {
-      id: "3",
-      name: "Educational Certificates.pdf",
+      id: "4",
+      name: "Institute Letter.pdf",
       type: "pdf" as const,
-      url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      url: loaderData?.Documents?.instituteLetter || "",
       uploadDate: "2024-01-12",
       size: "3.2 MB",
     },
     {
-      id: "4",
+      id: "5",
       name: "Profile Photo.jpg",
       type: "image" as const,
-      url: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
+      url: loaderData?.Documents?.profilePhoto || "",
       uploadDate: "2024-01-08",
       size: "1.8 MB",
     },
     {
-      id: "5",
-      name: "Medical Report.pdf",
+      id: "6",
+      name: "Police Report.pdf",
       type: "pdf" as const,
-      url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      url: loaderData?.Documents?.policeReport || "",
       uploadDate: "2024-01-15",
       size: "2.7 MB",
     },
-  ];
+  ].filter((doc) => doc.url); // Only show documents that have URLs
 
   const handleEditRequest = async () => {
     const confirmed = await ConfirmationModal.show({
@@ -108,11 +118,10 @@ export default function TraineeDetails() {
       <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {traineeDetailsLoader.Name}
+            {loaderData.personal_info.Name}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {traineeDetailsLoader.trainingProgram} - Batch{" "}
-            {traineeDetailsLoader.batchNumber}
+            {loaderData.personal_info.Training_institute}
           </p>
         </div>
         <button
@@ -129,7 +138,7 @@ export default function TraineeDetails() {
         <div className="flex items-center">
           <div className="h-3 w-3 bg-green-500 rounded-full mr-3"></div>
           <span className="text-green-800 dark:text-green-200 font-medium">
-            Training Status: {traineeDetailsLoader.status}
+            Training Status: {loaderData.status}
           </span>
         </div>
       </div>
@@ -149,7 +158,7 @@ export default function TraineeDetails() {
                 Full Name
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetailsLoader.fullname}
+                {loaderData.personal_info.fullName}
               </p>
             </div>
             <div>
@@ -157,35 +166,24 @@ export default function TraineeDetails() {
                 NIC Number
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetailsLoader.NIC}
+                {loaderData.personal_info.NIC}
               </p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">
-                Date of Birth
-              </label>
-              <p className="mt-1 text-gray-900 dark:text-white flex items-center">
-                <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                {new Date(
-                  traineeDetailsLoader.dateOfBirth
-                ).toLocaleDateString()}
-              </p>
-            </div>
-            <div>
+            {/*<div>
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">
                 Gender
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
                 {traineeDetailsLoader.gender}
               </p>
-            </div>
+            </div>*/}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">
                 Address
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-start">
                 <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-1 flex-shrink-0" />
-                {traineeDetailsLoader.address}
+                {loaderData.personal_info.address}
               </p>
             </div>
           </div>
@@ -208,7 +206,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                {traineeDetailsLoader.phone}
+                {loaderData.personal_info.Mobile_No}
               </p>
             </div>
             <div>
@@ -217,7 +215,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                {traineeDetailsLoader.email}
+                {loaderData.personal_info.email}
               </p>
             </div>
           </div>
@@ -239,7 +237,7 @@ export default function TraineeDetails() {
                 Contact Name
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetailsLoader.emergencyContact.name}
+                {loaderData.Emegency_contact.name}
               </p>
             </div>
             <div>
@@ -248,7 +246,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                {traineeDetailsLoader.emergencyContact.phone}
+                {loaderData.Emegency_contact.telephone}
               </p>
             </div>
             <div>
@@ -256,7 +254,7 @@ export default function TraineeDetails() {
                 Relationship
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetailsLoader.emergencyContact.relation}
+                {loaderData.Emegency_contact.relationship}
               </p>
             </div>
           </div>
@@ -278,15 +276,9 @@ export default function TraineeDetails() {
                 Training Program
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetailsLoader.trainingProgram}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">
-                Batch Number
-              </label>
-              <p className="mt-1 text-gray-900 dark:text-white">
-                {traineeDetailsLoader.batchNumber}
+                {loaderData.trainingProgram
+                  ? loaderData.trainingProgram
+                  : "Loading..."}
               </p>
             </div>
             <div>
@@ -295,7 +287,9 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                {new Date(traineeDetailsLoader.joinDate).toLocaleDateString()}
+                {new Date(
+                  loaderData.joinDate ? loaderData.joinDate : "Loading..."
+                ).toLocaleDateString()}
               </p>
             </div>
             <div>
@@ -303,7 +297,7 @@ export default function TraineeDetails() {
                 Current Status
               </label>
               <p className="mt-1 text-green-600 dark:text-green-400 font-medium">
-                {traineeDetailsLoader.status}
+                {loaderData.status}
               </p>
             </div>
           </div>

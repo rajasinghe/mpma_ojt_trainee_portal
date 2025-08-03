@@ -11,6 +11,7 @@ import api from "../api";
 export interface User {
   id: string;
   nickname: string;
+  email: string;
   NIC: string;
   username: string;
   status: string;

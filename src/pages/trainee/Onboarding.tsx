@@ -373,6 +373,7 @@ export default function Onboarding() {
       formData.append("bankPayment[paymentDate]", data.bankPayment.paymentDate);
       formData.append("bankPayment[bankReceipt]", data.bankPayment.bankReceipt);
       formData.append("user_id", user?.id?.toString() || "");
+      formData.append("NIC", user?.NIC || "");
 
       const response = await api.post("api/trainee/payment", formData, {
         headers: {
