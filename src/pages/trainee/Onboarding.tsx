@@ -418,6 +418,21 @@ export default function Onboarding() {
     }
   };
 
+  // Only validate and submit the payment section (step 4)
+  const submitBankPaymentStep = async () => {
+    const isValid = await trigger("bankPayment");
+    const receipt = getValues("bankPayment.bankReceipt");
+    if (!receipt) {
+      error("Please upload your bank receipt");
+      return;
+    }
+    if (!isValid) {
+      error("Please fix errors in payment details.");
+      return;
+    }
+    await onSubmitBankPayment(getValues());
+  };
+
   return (
     <div
       className="min-h-screen py-8 px-4 sm:px-6 lg:px-8"
@@ -1222,15 +1237,30 @@ export default function Onboarding() {
 
               {/* Navigation Buttons */}
               <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={prevStep}
-                  icon={ChevronLeft}
-                  iconPosition="left"
-                  type="button"
-                >
-                  {currentStep === 1 ? "Back to Login" : "Previous"}
-                </Button>
+                {currentStep === 4 ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      logout();
+                      navigate("/login");
+                    }}
+                    icon={ChevronLeft}
+                    iconPosition="left"
+                    type="button"
+                  >
+                    Back to Login
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    icon={ChevronLeft}
+                    iconPosition="left"
+                    type="button"
+                  >
+                    {currentStep === 1 ? "Back to Login" : "Previous"}
+                  </Button>
+                )}
 
                 {currentStep < 3 ? (
                   <Button
@@ -1253,11 +1283,11 @@ export default function Onboarding() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSubmit(onSubmitBankPayment)} // Step 4: only payment
+                    onClick={submitBankPaymentStep}
                     loading={isSubmitting}
                     variant="primary"
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-                    type="submit"
+                    type="button"
                   >
                     {isSubmitting ? "Processing Payment..." : "Complete Setup"}
                   </Button>
