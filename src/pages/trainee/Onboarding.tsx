@@ -254,12 +254,12 @@ export default function Onboarding() {
           return;
         }
         if (isValid) {
-          const formData = getValues(); // ✅ grab all current form data
+          const formData = getValues(); // grab all current form data
 
-          // ✅ Send trainee data before proceeding
+          // Send trainee data before proceeding
           await onSubmitTraineeData(formData);
 
-          setCurrentStep(4); // ✅ move to payment step only if success
+          setCurrentStep(4); // move to payment step only if success
           return;
         }
       }
@@ -365,15 +365,21 @@ export default function Onboarding() {
       }
 
       const formData = new FormData();
+
+      // Append identifiers first so multer sees them before the file
+      formData.append("user_id", user?.id?.toString() || "");
+      formData.append("NIC", user?.NIC || "");
+
+      // Then append other payment fields
       formData.append(
         "bankPayment[paymentAmount]",
         data.bankPayment.paymentAmount
       );
       formData.append("bankPayment[accountNo]", data.bankPayment.accountNo);
       formData.append("bankPayment[paymentDate]", data.bankPayment.paymentDate);
+
+      // Append the file last to ensure folder name is resolved with NIC
       formData.append("bankPayment[bankReceipt]", data.bankPayment.bankReceipt);
-      formData.append("user_id", user?.id?.toString() || "");
-      formData.append("NIC", user?.NIC || "");
 
       const response = await api.post("api/trainee/payment", formData, {
         headers: {

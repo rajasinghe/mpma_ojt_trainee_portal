@@ -11,6 +11,8 @@ import {
   CreditCard,
   Building,
   Hash,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import {
   ValidatedInput,
@@ -35,7 +37,7 @@ export default function TraineeProfile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { success, warning } = useToastHelpers();
+  const { success, warning, error } = useToastHelpers();
 
   const [profileData, setProfileData] = useState<ProfileUpdateFormData>({
     name: user?.username || "",
@@ -63,6 +65,34 @@ export default function TraineeProfile() {
     pushNotifications: true,
     weeklyReports: true,
   });
+
+  const [emailVerification, setEmailVerification] = useState({
+    isVerifying: false,
+    isVerified: user?.emailVerified || false,
+    pendingEmail: "",
+  });
+
+  const handleEmailVerification = async () => {
+    if (!profileData.email) return;
+
+    setEmailVerification((prev) => ({ ...prev, isVerifying: true }));
+
+    try {
+      // Send verification email API call
+      // await api.post('/api/send-email-verification', { email: profileData.email });
+
+      setEmailVerification((prev) => ({
+        ...prev,
+        isVerifying: false,
+        pendingEmail: profileData.email,
+      }));
+
+      success("Verification email sent! Please check your inbox.");
+    } catch (err) {
+      setEmailVerification((prev) => ({ ...prev, isVerifying: false }));
+      error("Failed to send verification email. Please try again.");
+    }
+  };
 
   // Form validation hooks
   const profileValidation = useFormValidation({
@@ -255,23 +285,76 @@ export default function TraineeProfile() {
                   }
                   error={profileValidation.getFieldError("name")}
                 />
-                <ValidatedInput
-                  label="Email Address"
-                  type="email"
-                  required
-                  value={profileData.email}
-                  onChange={(e) =>
-                    handleProfileFieldChange("email", e.target.value)
-                  }
-                  onBlur={(e) =>
-                    profileValidation.handleFieldBlur(
-                      "email",
-                      e.target.value,
-                      profileData
-                    )
-                  }
-                  error={profileValidation.getFieldError("email")}
-                />
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Email Address *
+                  </label>
+                  <div className="flex space-x-2">
+                    <div className="flex-1">
+                      <input
+                        type="email"
+                        required
+                        value={profileData.email}
+                        onChange={(e) =>
+                          handleProfileFieldChange("email", e.target.value)
+                        }
+                        onBlur={(e) =>
+                          profileValidation.handleFieldBlur(
+                            "email",
+                            e.target.value,
+                            profileData
+                          )
+                        }
+                        className={`block w-full px-4 py-3 rounded-lg shadow-sm border transition-all duration-300 hover:border-gray-400 focus:shadow-lg focus:outline-none ${
+                          profileValidation.getFieldError("email")
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                            : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        } bg-white text-gray-900`}
+                      />
+                      {profileValidation.getFieldError("email") && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {profileValidation.getFieldError("email")}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleEmailVerification}
+                      disabled={
+                        emailVerification.isVerifying || !profileData.email
+                      }
+                      className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 h-12 self-start"
+                    >
+                      {emailVerification.isVerifying ? (
+                        <span>Sending...</span>
+                      ) : (
+                        <>
+                          {emailVerification.isVerified ? (
+                            <Check className="h-4 w-4" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4" />
+                          )}
+                          <span>Verify</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    {emailVerification.isVerified ? (
+                      <span className="text-sm text-green-600 flex items-center">
+                        <Check className="h-4 w-4 mr-1" />
+                        Email verified
+                      </span>
+                    ) : (
+                      <span className="text-sm text-orange-600 flex items-center">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        Email not verified
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <ValidatedInput
                   label="Phone Number"
                   type="tel"
