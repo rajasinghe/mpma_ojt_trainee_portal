@@ -23,6 +23,11 @@ export default function ProtectedRoute({
   }
 
   if (requiresOnboarding) {
+    // If user paused after documents but before payment, send to payment step
+    if (user.status === "PendingPayment") {
+      return <Navigate to="/onboarding?step=4" replace />;
+    }
+    // If user hasn't completed onboarding, send to onboarding start
     if (!user.status || user.status == "Pending") {
       return <Navigate to="/onboarding" replace />;
     }

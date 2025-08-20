@@ -41,6 +41,10 @@ export default function Login() {
       return <Navigate to="/onboarding" replace />;
     }
 
+    if (user.status === "PendingPayment") {
+      return <Navigate to="/onboarding?step=4" replace />;
+    }
+
     if (user.status == "Active") {
       return <Navigate to="/trainee" replace />;
     }

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   ChevronLeft,
@@ -75,10 +75,30 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { success, error } = useToastHelpers();
   const [dragActiveSection, setDragActiveSection] = useState<string | null>(
     null
   );
+
+  // Initialize step from query or user status
+  useEffect(() => {
+    // If explicitly requested via query param
+    const params = new URLSearchParams(location.search);
+    const stepParam = params.get("step");
+    if (stepParam) {
+      const s = parseInt(stepParam, 10);
+      if (!isNaN(s) && s >= 1 && s <= 4) {
+        setCurrentStep(s);
+        return;
+      }
+    }
+
+    // Otherwise infer from user status
+    if (user?.status === "PendingPayment") {
+      setCurrentStep(4);
+    }
+  }, [location.search, user?.status]);
 
   const steps = [
     {
@@ -255,11 +275,11 @@ export default function Onboarding() {
         }
         if (isValid) {
           const formData = getValues(); // grab all current form data
-
           // Send trainee data before proceeding
-          await onSubmitTraineeData(formData);
-
-          setCurrentStep(4); // move to payment step only if success
+          const ok = await onSubmitTraineeData(formData);
+          if (ok) {
+            setCurrentStep(4); // move to payment step only if success
+          }
           return;
         }
       }
@@ -348,10 +368,11 @@ export default function Onboarding() {
       });
 
       success("Trainee data submitted successfully!");
-      setCurrentStep(4);
+      return true;
     } catch (err) {
       console.error("Error submitting trainee data:", err);
       error("Failed to submit trainee data.");
+      return false;
     }
   };
 
