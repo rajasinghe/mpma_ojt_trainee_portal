@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLoaderData } from "react-router-dom";
 import { Download, CalendarDays, Building2, Clock, User } from "lucide-react";
 import {
   Card,
@@ -9,6 +10,19 @@ import {
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import { useAuth } from "../../contexts/AuthContext";
+
+type ScheduleSummary = {
+  traineeId: number;
+  nic: string;
+  overall: { startDate: string; endDate: string } | null;
+  departmentDurations: Array<{
+    scheduleId: number;
+    departmentId: number;
+    departmentName: string | null;
+    startDate: string;
+    endDate: string;
+  }>;
+} | null;
 
 interface SchedulePeriod {
   id: string;
@@ -28,74 +42,49 @@ interface SchedulePeriod {
 export default function TraineeSchedule() {
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
+  const data = useLoaderData() as ScheduleSummary | [];
 
-  // Mock schedule data - in real app this would come from API
-  const scheduleData: SchedulePeriod[] = [
-    {
-      id: "1",
-      period: "Month 1-2",
-      startDate: "2024-01-15",
-      endDate: "2024-03-15",
-      department: "Department 1",
-      supervisor: "Sarah Johnson",
-      supervisorEmail: "sarah.johnson@company.com",
-      supervisorPhone: "+94 77 123 4567",
-      location: "Building A, Floor 3, Room 301",
-      objectives: [
-        "Learn React fundamentals and component architecture",
-        "Master HTML5, CSS3, and responsive design principles",
-        "Understand state management with React hooks",
-        "Practice version control with Git and GitHub",
-      ],
-      status: "completed",
-      completionPercentage: 100,
-    },
-    {
-      id: "2",
-      period: "Month 3-4",
-      startDate: "2024-03-16",
-      endDate: "2024-05-15",
-      department: "Department 2",
-      supervisor: "Michael Chen",
-      supervisorEmail: "michael.chen@company.com",
-      supervisorPhone: "+94 77 234 5678",
-      location: "Building B, Floor 2, Room 205",
-      objectives: [
-        "Learn Node.js and Express.js framework",
-        "Understand database design and SQL queries",
-        "Practice API development and testing",
-        "Learn authentication and security best practices",
-      ],
-      status: "current",
-      completionPercentage: 65,
-    },
-    {
-      id: "3",
-      period: "Month 5-6",
-      startDate: "2024-05-16",
-      endDate: "2024-07-15",
-      department: "Department 3",
-      supervisor: "David Rodriguez",
-      supervisorEmail: "david.rodriguez@company.com",
-      supervisorPhone: "+94 77 345 6789",
-      location: "Building C, Floor 1, Room 102",
-      objectives: [
-        "Learn containerization with Docker",
-        "Understand CI/CD pipelines and automation",
-        "Practice cloud deployment on AWS/Azure",
-        "Monitor application performance and logging",
-      ],
-      status: "upcoming",
-    },
-  ];
+  const isEmpty = Array.isArray(data);
+  const summary = (!isEmpty ? (data as ScheduleSummary) : null) as ScheduleSummary;
+  const scheduleItems = summary?.departmentDurations ?? [];
+  const overall = summary?.overall ?? null;
+
+  const today = new Date();
+  const getStatus = (start: string, end: string): "upcoming" | "current" | "completed" => {
+    const s = new Date(start);
+    const e = new Date(end);
+    if (today < s) return "upcoming";
+    if (today > e) return "completed";
+    return "current";
+  };
+
+  const scheduleData: SchedulePeriod[] = scheduleItems.map((s, idx) => ({
+    id: String(s.scheduleId),
+    period: `Schedule ${idx + 1}`,
+    startDate: s.startDate,
+    endDate: s.endDate,
+    department: s.departmentName || `Department ${s.departmentId}`,
+    supervisor: "",
+    supervisorEmail: "",
+    supervisorPhone: "",
+    location: s.departmentName || "",
+    objectives: [],
+    status: getStatus(s.startDate, s.endDate),
+  }));
 
   const trainingInfo = {
-    program: "Web Development",
-    duration: "6 months",
-    startDate: "2024-01-15",
-    endDate: "2024-07-15",
-    totalDepartments: 3,
-    currentDepartment: "Department 2",
+    program: "OJT Program",
+    duration:
+      overall
+        ? `${new Date(overall.startDate).toLocaleDateString()} - ${new Date(
+            overall.endDate
+          ).toLocaleDateString()}`
+        : "",
+    startDate: overall?.startDate ?? "",
+    endDate: overall?.endDate ?? "",
+    totalDepartments: scheduleItems.length,
+    currentDepartment:
+      scheduleData.find((p) => p.status === "current")?.department || "",
   };
 
   const getStatusBadge = (status: string) => {
@@ -130,13 +119,8 @@ export default function TraineeSchedule() {
 TRAINING SCHEDULE
 ${trainingInfo.program}
 
-Trainee: ${user?.name}
-Duration: ${trainingInfo.duration}
-Training Period: ${new Date(
-      trainingInfo.startDate
-    ).toLocaleDateString()} - ${new Date(
-      trainingInfo.endDate
-    ).toLocaleDateString()}
+Trainee: ${user?.username ?? ""}
+Training Period: ${trainingInfo.duration}
 
 DEPARTMENT ASSIGNMENTS:
 
@@ -162,7 +146,7 @@ OJT Portal - Training Management System
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${user?.name?.replace(/\s+/g, "_")}_Training_Schedule.doc`;
+    link.download = `${(user?.username ?? "trainee").replace(/\s+/g, "_")}_Training_Schedule.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -267,7 +251,7 @@ OJT Portal - Training Management System
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span className="flex items-center">
                         <CalendarDays className="h-4 w-4 mr-1" />
-                        {new Date(period.startDate).toLocaleDateString()} -{" "}
+                        {new Date(period.startDate).toLocaleDateString()} - {" "}
                         {new Date(period.endDate).toLocaleDateString()}
                       </span>
                     </div>

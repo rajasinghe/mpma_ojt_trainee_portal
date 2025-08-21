@@ -35,6 +35,19 @@ import TraineeNotifications from "./pages/trainee/TraineeNotifications";
 import TraineeChat from "./pages/trainee/TraineeChat";
 import TraineeProfile from "./pages/trainee/TraineeProfile";
 import TraineeSchedule from "./pages/trainee/TraineeSchedule";
+import api from "./api";
+
+// Inline loader for trainee schedule
+async function traineeScheduleLoader() {
+  const storedUser = localStorage.getItem("ojt_user");
+  if (!storedUser) {
+    return null;
+  }
+  const { NIC } = JSON.parse(storedUser) as { NIC: string };
+  if (!NIC) return null;
+  const res = await api.get(`/api/trainee/schedule_summary/${NIC}`);
+  return res.data;
+}
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +86,7 @@ export const router = createBrowserRouter([
       {
         path: "schedule",
         element: <TraineeSchedule />,
+        loader: traineeScheduleLoader,
       },
       {
         path: "attendance",
