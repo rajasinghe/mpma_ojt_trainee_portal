@@ -118,10 +118,10 @@ export default function TraineeDetails() {
       <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {loaderData.personal_info.Name}
+            {loaderData?.personal_info?.Name || loaderData?.name || loaderData?.nickname || ''}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {loaderData.personal_info.Training_institute}
+            {loaderData?.personal_info?.Training_institute || loaderData?.training_institute || ''}
           </p>
         </div>
         <button
@@ -158,7 +158,7 @@ export default function TraineeDetails() {
                 Full Name
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {loaderData.personal_info.fullName}
+                {loaderData?.personal_info?.fullName || loaderData?.name || loaderData?.nickname || ''}
               </p>
             </div>
             <div>
@@ -166,7 +166,7 @@ export default function TraineeDetails() {
                 NIC Number
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {loaderData.personal_info.NIC}
+                {loaderData?.personal_info?.NIC || loaderData?.nic || ''}
               </p>
             </div>
             {/*<div>
@@ -183,7 +183,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-start">
                 <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-1 flex-shrink-0" />
-                {loaderData.personal_info.address}
+                {loaderData?.personal_info?.address || ''}
               </p>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                {loaderData.personal_info.Mobile_No}
+                {loaderData?.personal_info?.Mobile_No || loaderData?.contact_no || ''}
               </p>
             </div>
             <div>
@@ -215,7 +215,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                {loaderData.personal_info.email}
+                {loaderData?.personal_info?.email || loaderData?.email || ''}
               </p>
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function TraineeDetails() {
                 Contact Name
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {loaderData.Emegency_contact.name}
+                {loaderData?.Emegency_contact?.name || ''}
               </p>
             </div>
             <div>
@@ -246,7 +246,7 @@ export default function TraineeDetails() {
               </label>
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                {loaderData.Emegency_contact.telephone}
+                {loaderData?.Emegency_contact?.telephone || ''}
               </p>
             </div>
             <div>
@@ -254,7 +254,7 @@ export default function TraineeDetails() {
                 Relationship
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {loaderData.Emegency_contact.relationship}
+                {loaderData?.Emegency_contact?.relationship || ''}
               </p>
             </div>
           </div>
@@ -276,7 +276,7 @@ export default function TraineeDetails() {
                 Training Program
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">
-                {loaderData.trainingProgram
+                {loaderData?.trainingProgram
                   ? loaderData.trainingProgram
                   : "Loading..."}
               </p>
@@ -288,7 +288,7 @@ export default function TraineeDetails() {
               <p className="mt-1 text-gray-900 dark:text-white flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                 {new Date(
-                  loaderData.joinDate ? loaderData.joinDate : "Loading..."
+                  loaderData?.joinDate ? loaderData.joinDate : "Loading..."
                 ).toLocaleDateString()}
               </p>
             </div>
@@ -297,7 +297,7 @@ export default function TraineeDetails() {
                 Current Status
               </label>
               <p className="mt-1 text-green-600 dark:text-green-400 font-medium">
-                {loaderData.status}
+                {loaderData?.status || ''}
               </p>
             </div>
           </div>

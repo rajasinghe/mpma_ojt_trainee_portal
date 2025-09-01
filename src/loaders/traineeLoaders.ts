@@ -211,20 +211,38 @@ const traineeEventLoader = async (): Promise<CalenderData[]> => {
   }
 };
 
-const fetchTraineeDetails = async (id: number) => {
+const fetchTraineeDetails = async (user: any) => {
+  // 1) Try primary endpoint by user id
   try {
-    const response = await api.get(`api/trainee/trainee_details/${id}`);
-
-    if (response.status === 200) {
-      console.log("trainee data", response.data);
+    const response = await api.get(`api/trainee/trainee_details/${user.id}`);
+    if (
+      response.status === 200 &&
+      response.data &&
+      Object.keys(response.data).length > 0
+    ) {
+      console.log("trainee data (by user id)", response.data);
       return response.data;
     }
-
-    return {}; // Return empty object if no data
   } catch (error) {
-    console.error("Error fetching trainee data:", error);
-    return {}; // Return empty object on error
+    console.warn("Primary fetch (by user id) failed, will try NIC fallback:", error);
   }
+
+  // 2) Fallback to NIC-based endpoint if available
+  try {
+    if (user?.NIC) {
+      const nic = encodeURIComponent(user.NIC);
+      const response = await api.get(`api/trainee/active_trainee_by_nic/${nic}`);
+      if (response.status === 200 && response.data) {
+        console.log("trainee data (by NIC)", response.data);
+        return response.data;
+      }
+    }
+  } catch (error) {
+    console.error("NIC fallback fetch failed:", error);
+  }
+
+  // 3) Nothing found
+  return {};
 };
 
 const getTraineeDocuments = async (id: number) => {
@@ -246,7 +264,8 @@ const getTraineeDocuments = async (id: number) => {
 export const traineeDetailsLoader = async () => {
   // Get user from auth context or session
   const user = getCurrentUser();
-  const traineeData = await fetchTraineeDetails(user.id);
+  const traineeData = await fetchTraineeDetails(user);
+  console.log("trainee dataqqqqq", traineeData);
   const documents = await getTraineeDocuments(user.id);
   return { ...traineeData, Documents: documents };
 };

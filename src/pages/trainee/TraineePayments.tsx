@@ -6,7 +6,6 @@ import {
   Calendar,
   TrendingUp,
   Download,
-  Eye,
 } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
@@ -207,9 +206,6 @@ export default function TraineePayments() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Actions
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -234,11 +230,6 @@ export default function TraineePayments() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(payment.status ? "paid" : "pending")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Button variant="ghost" size="sm" icon={Eye}>
-                        View
-                      </Button>
                     </td>
                   </tr>
                 ))}
